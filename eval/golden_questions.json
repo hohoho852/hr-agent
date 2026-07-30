@@ -1,0 +1,44 @@
+[
+  {
+    "id": "b_al_entitlement",
+    "question": "How many annual leave days do full-time employees get per leave year?",
+    "must_include_any": ["15", "15 working days", "annual leave"],
+    "expected_file_substr": "02_leave_and_time_off_policy"
+  },
+  {
+    "id": "b_request_time_off",
+    "question": "How do I request annual leave in SuccessFactors?",
+    "must_include_any": ["Time Off", "Request Time Off", "Submit", "manager"],
+    "expected_file_substr": "03_how_to_request_time_off"
+  },
+  {
+    "id": "b_sick_cert",
+    "question": "When do I need a medical certificate for sick leave?",
+    "must_include_any": ["2", "medical certificate", "consecutive"],
+    "expected_file_substr": "02_leave_and_time_off_policy"
+  },
+  {
+    "id": "b_update_address",
+    "question": "How do I update my home address in SuccessFactors?",
+    "must_include_any": ["Personal Information", "Addresses", "Effective", "Save"],
+    "expected_file_substr": "05_how_to_update_personal_info"
+  },
+  {
+    "id": "b_hybrid_default",
+    "question": "What is the default hybrid work pattern?",
+    "must_include_any": ["3 days", "2 days", "office", "remote"],
+    "expected_file_substr": "06_hybrid_work_and_attendance_policy"
+  },
+  {
+    "id": "b_expense_steps",
+    "question": "How do I submit an expense claim and what receipt threshold applies?",
+    "must_include_any": ["Expenses", "100", "receipt", "manager"],
+    "expected_file_substr": "07_how_to_submit_expense_claim"
+  },
+  {
+    "id": "b_when_contact_hr",
+    "question": "When should I contact HR instead of using self-serve?",
+    "must_include_any": ["exception", "payroll", "ticket", "grievance", "HR"],
+    "expected_file_substr": "08_hr_contact_and_escalation"
+  }
+]
