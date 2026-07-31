@@ -64,8 +64,8 @@ Other good prompts:
 **Requirements:** Python 3.10+, a [DeepSeek API key](https://platform.deepseek.com/)
 
 ```bash
-git clone https://github.com/<YOUR_USERNAME>/hr-employee-selfserve.git
-cd hr-employee-selfserve
+git clone https://github.com/hohoho852/hr-agent.git
+cd hr-agent
 
 python3 -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
@@ -87,7 +87,7 @@ First ingest downloads the local embedding model (one-time).
 ## Project layout
 
 ```text
-hr-employee-selfserve/
+hr-agent/
 ├── app.py                      # Streamlit UI
 ├── data/                       # synthetic Acme HK policy + how-to pack
 ├── docs/CASE_STUDY.md          # portfolio narrative

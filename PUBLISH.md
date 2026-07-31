@@ -4,16 +4,12 @@ Local prep is done when `git log` shows the initial commit and `git status` is c
 
 ## When your new GitHub account exists
 
-1. Create a **public** empty repo named `hr-employee-selfserve` (no README/license — already in this repo).
-2. From this folder:
+1. Repo is published: **https://github.com/hohoho852/hr-agent** (public).
+2. Local path matches:
 
 ```bash
-cd ~/Projects/hr-employee-selfserve
-git remote add origin git@github.com:<YOUR_NEW_USERNAME>/hr-employee-selfserve.git
-# or HTTPS:
-# git remote add origin https://github.com/<YOUR_NEW_USERNAME>/hr-employee-selfserve.git
-
-git branch -M main
+cd ~/Projects/hr-agent
+git remote -v   # origin → https://github.com/hohoho852/hr-agent.git
 git push -u origin main
 ```
 
