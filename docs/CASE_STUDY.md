@@ -1,9 +1,9 @@
-# Case Study — Employee HR Self-Serve
+# Case Study — HR Agent
 
 Portfolio product · Enterprise AI deployment track  
 **Publish target:** public GitHub (job-hunting portfolio)
 
-> This case study covers **only** the employee self-serve product.  
+> This case study covers **only** HR Agent (employee policy + how-to assistant).  
 > Multi-SaaS implementation copilot is a **separate product/repo** (`hcm-impl-copilot`).
 
 ---

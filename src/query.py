@@ -1,4 +1,4 @@
-"""Load employee HR index and create a citation-friendly query engine."""
+"""Load HR Agent index and create a citation-friendly query engine."""
 
 from __future__ import annotations
 
@@ -48,7 +48,7 @@ def get_query_engine(similarity_top_k: int = SIMILARITY_TOP_K):
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="CLI smoke query — employee HR")
+    parser = argparse.ArgumentParser(description="CLI smoke query — HR Agent")
     parser.add_argument(
         "--question",
         default="How do I request annual leave in SuccessFactors?",

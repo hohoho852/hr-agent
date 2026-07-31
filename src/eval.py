@@ -1,4 +1,4 @@
-"""Lightweight evaluation harness — employee HR self-serve only."""
+"""Lightweight evaluation harness for HR Agent."""
 
 from __future__ import annotations
 
@@ -82,7 +82,7 @@ def evaluate(golden_path: Path | None = None) -> dict:
 
     n = len(rows) or 1
     return {
-        "product": "hr-employee-selfserve",
+        "product": "hr-agent",
         "cases": len(rows),
         "pass_rate": round(sum(1 for r in rows if r["pass"]) / n, 3),
         "keyword_hit_rate": round(sum(1 for r in rows if r["keyword_hit"]) / n, 3),
@@ -93,7 +93,7 @@ def evaluate(golden_path: Path | None = None) -> dict:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Evaluate employee HR self-serve RAG")
+    parser = argparse.ArgumentParser(description="Evaluate HR Agent RAG")
     parser.add_argument("--golden", type=Path, default=None)
     parser.add_argument("--out", type=Path, default=None)
     args = parser.parse_args(argv)

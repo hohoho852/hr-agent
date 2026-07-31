@@ -1,4 +1,4 @@
-"""Streamlit UI — Employee HR Self-Serve (portfolio product B)."""
+"""Streamlit UI — HR Agent (portfolio product B)."""
 
 from __future__ import annotations
 

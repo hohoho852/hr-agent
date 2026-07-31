@@ -1,4 +1,4 @@
-"""Runtime config — Employee HR Self-Serve (Track B portfolio product).
+"""Runtime config — HR Agent (Track B portfolio product).
 
 Single product. No implementation-consultant / multi-SaaS code paths.
 """
@@ -16,7 +16,7 @@ from llama_index.llms.deepseek import DeepSeek
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = PROJECT_ROOT / "data"
 PERSIST_DIR = PROJECT_ROOT / "chroma_db"
-COLLECTION_NAME = "employee_hr_selfserve"
+COLLECTION_NAME = "employee_hr_selfserve"  # legacy id — do not rename (breaks local Chroma index)
 
 CHUNK_SIZE = 800
 CHUNK_OVERLAP = 120
@@ -25,7 +25,7 @@ SIMILARITY_TOP_K = 4
 EMBED_MODEL_NAME = "BAAI/bge-small-en-v1.5"
 LLM_MODEL_NAME = "deepseek-chat"
 
-PRODUCT_NAME = "Employee HR Self-Serve"
+PRODUCT_NAME = "HR Agent"
 PRODUCT_TAGLINE = "Company policy + standard HR how-tos — deflect Tier-1 tickets"
 
 

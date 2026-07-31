@@ -1,6 +1,6 @@
 # Contributing
 
-This is a **portfolio demo** of an employee HR self-serve RAG assistant.
+This is a **portfolio demo** of **HR Agent** — an employee policy + how-to RAG assistant.
 
 ## Local setup
 

@@ -18,7 +18,7 @@ git push -u origin main
 ```
 
 3. GitHub repo settings (recommended for portfolio):
-   - Description: `Employee HR self-serve RAG — policy + how-to answers with citations (Tier-1 deflection)`
+   - Description: `HR Agent — employee policy + how-to RAG with citations (Tier-1 deflection)`
    - Topics: `rag`, `hr`, `streamlit`, `llamaindex`, `portfolio`, `deepseek`
    - About → link case study path in README
 

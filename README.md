@@ -1,8 +1,8 @@
-# Employee HR Self-Serve (RAG)
+# HR Agent
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Portfolio project: a **production-style HR knowledge assistant** that answers:
+**HR Agent** — employee policy + how-to assistant (RAG). Portfolio project: a **production-style HR knowledge assistant** that answers:
 
 1. **Company policy** questions (leave, hybrid work, expenses, privacy)
 2. **How to perform standard HR actions** in the HRIS (request time off, update profile, submit expenses)

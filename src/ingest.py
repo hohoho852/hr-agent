@@ -78,7 +78,7 @@ def build_index(reset: bool = True):
 
 def main(argv: list[str] | None = None) -> None:
     _ensure_root()
-    parser = argparse.ArgumentParser(description="Ingest employee HR self-serve corpus")
+    parser = argparse.ArgumentParser(description="Ingest HR Agent corpus")
     parser.add_argument("--no-reset", action="store_true", help="Do not wipe existing index")
     args = parser.parse_args(argv)
     build_index(reset=not args.no_reset)
