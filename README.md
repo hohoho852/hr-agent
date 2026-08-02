@@ -81,6 +81,22 @@ First ingest downloads the local embedding model (one-time).
 
 ---
 
+## Deploy on Streamlit Community Cloud
+
+No Docker required. Point Streamlit at this repo with **Main file:** `app.py`.
+
+**Secrets (TOML):**
+
+```toml
+DEEPSEEK_API_KEY = "your_deepseek_key_here"
+```
+
+**First boot:** the app downloads the local BGE embedding model and builds the Chroma index from `data/` automatically (several minutes on a cold container). The vector store is not committed — each new container rebuilds on first start.
+
+**Requirements:** Python 3.10+ (set in Streamlit app settings if needed). Dependencies are in `requirements.txt`.
+
+---
+
 ## Layout
 
 ```text

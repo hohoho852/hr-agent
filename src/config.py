@@ -33,12 +33,33 @@ def project_root() -> Path:
     return PROJECT_ROOT
 
 
+def _api_key_from_streamlit() -> str | None:
+    try:
+        import streamlit as st
+    except ImportError:
+        return None
+    try:
+        secrets = st.secrets
+        if "DEEPSEEK_API_KEY" in secrets:
+            return str(secrets["DEEPSEEK_API_KEY"]).strip()
+        if hasattr(secrets, "get"):
+            val = secrets.get("DEEPSEEK_API_KEY")
+            if val:
+                return str(val).strip()
+    except Exception:
+        return None
+    return None
+
+
 def require_api_key() -> str:
     load_dotenv(PROJECT_ROOT / ".env")
-    api_key = (os.getenv("DEEPSEEK_API_KEY") or "").strip()
+    api_key = (os.environ.get("DEEPSEEK_API_KEY") or "").strip()
+    if not api_key or api_key.lower().startswith("your_"):
+        api_key = (_api_key_from_streamlit() or "").strip()
     if not api_key or api_key.lower().startswith("your_"):
         raise RuntimeError(
-            "DEEPSEEK_API_KEY missing. Copy .env.example to .env and set your key."
+            "DEEPSEEK_API_KEY missing. For local runs, copy .env.example to .env and set your key. "
+            "On Streamlit Community Cloud, add DEEPSEEK_API_KEY to app Secrets (TOML)."
         )
     return api_key
 

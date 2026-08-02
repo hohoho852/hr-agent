@@ -25,11 +25,34 @@ def _ensure_root() -> None:
         sys.path.insert(0, root)
 
 
-def get_query_engine(similarity_top_k: int = SIMILARITY_TOP_K):
+def index_needs_build() -> bool:
+    persist_path = Path(PERSIST_DIR)
+    if not persist_path.exists():
+        return True
+    client = chromadb.PersistentClient(path=str(persist_path))
+    collection = client.get_or_create_collection(COLLECTION_NAME)
+    return collection.count() == 0
+
+
+def ensure_index() -> bool:
+    """Build index from data/ when missing or empty. Returns True if ingest ran."""
+    if not index_needs_build():
+        return False
+    from src.ingest import build_index
+
+    build_index(reset=True)
+    return True
+
+
+def get_query_engine(similarity_top_k: int = SIMILARITY_TOP_K, *, ensure: bool = True):
+    if ensure:
+        ensure_index()
     configure_settings()
     persist_path = Path(PERSIST_DIR)
     if not persist_path.exists():
-        raise FileNotFoundError(f"No index at {persist_path}. Run: python -m src.ingest")
+        raise FileNotFoundError(
+            f"No index at {persist_path}. Run: python -m src.ingest"
+        )
 
     client = chromadb.PersistentClient(path=str(persist_path))
     collection = client.get_or_create_collection(COLLECTION_NAME)

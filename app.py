@@ -12,7 +12,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.config import PRODUCT_NAME, PRODUCT_TAGLINE
-from src.query import get_query_engine
+from src.query import get_query_engine, index_needs_build
 
 st.set_page_config(page_title=PRODUCT_NAME, page_icon="📋", layout="centered")
 
@@ -60,21 +60,33 @@ with st.sidebar:
 - When should I contact HR instead of self-serve?
 """
     )
-    st.caption("Rebuild after corpus changes: `python -m src.ingest`")
+    st.caption(
+        "Rebuild after corpus changes: `python -m src.ingest`. "
+        "On Streamlit Cloud, the index builds automatically on first start."
+    )
 
 
-@st.cache_resource(show_spinner="Loading retrieval engine...")
+@st.cache_resource(show_spinner=False)
 def load_engine():
     return get_query_engine()
 
 
 try:
-    engine = load_engine()
+    if index_needs_build():
+        with st.spinner(
+            "First start: downloading embedding model and building index from data/ "
+            "(may take several minutes)..."
+        ):
+            engine = load_engine()
+    else:
+        with st.spinner("Loading retrieval engine..."):
+            engine = load_engine()
 except Exception as exc:  # noqa: BLE001
     st.error(f"Could not load the query engine: {exc}")
     st.info(
-        "Add policy/how-to docs to `data/`, set `DEEPSEEK_API_KEY` in `.env`, "
-        "then run `python -m src.ingest`."
+        "Set `DEEPSEEK_API_KEY` in `.env` for local runs, or in Streamlit Cloud Secrets "
+        "(TOML key `DEEPSEEK_API_KEY`) for deployment. Add policy/how-to docs to `data/`. "
+        "Locally, run `python -m src.ingest`; on Streamlit Cloud the index builds on first start."
     )
     st.stop()
 
