@@ -30,27 +30,6 @@ QA_PROMPT = PromptTemplate(
     "Answer: "
 )
 
-REFINE_PROMPT = PromptTemplate(
-    """The original query is as follows: {query_str}
-We have provided an existing answer: {existing_answer}
-We have the opportunity to refine the existing answer (only if needed) with some more \
-context below.
-
-Instructions (same as before):
-- Answer ONLY from the retrieved context — not general knowledge.
-- For how-to questions, prefer short numbered steps.
-- If context is insufficient, say so and suggest an HR ticket.
-- Inform ≠ execute: never claim workflow submission or approvals.
-- Escalate exceptions, payroll, grievances, and sensitive cases to HR.
-
-------------
-{context_msg}
-------------
-Given the new context, refine the original answer to better answer the query. If the \
-context isn't useful, return the original answer.
-Refined Answer: """
-)
-
 
 def _ensure_root() -> None:
     root = str(project_root())
@@ -77,6 +56,27 @@ def ensure_index() -> bool:
     return True
 
 
+def _attach_qa_prompt(engine) -> None:
+    """Best-effort attach of employee-assistant QA template across LlamaIndex versions."""
+    try:
+        engine.update_prompts({"response_synthesizer:text_qa_template": QA_PROMPT})
+        return
+    except Exception:
+        pass
+    try:
+        synthesizer = getattr(engine, "_response_synthesizer", None)
+        if synthesizer is None:
+            return
+        if hasattr(synthesizer, "update_prompts"):
+            synthesizer.update_prompts({"text_qa_template": QA_PROMPT})
+        elif hasattr(synthesizer, "text_qa_template"):
+            synthesizer.text_qa_template = QA_PROMPT
+        elif hasattr(synthesizer, "_text_qa_template"):
+            synthesizer._text_qa_template = QA_PROMPT
+    except Exception:
+        pass
+
+
 def get_query_engine(similarity_top_k: int = SIMILARITY_TOP_K, *, ensure: bool = True):
     if ensure:
         ensure_index()
@@ -97,12 +97,13 @@ def get_query_engine(similarity_top_k: int = SIMILARITY_TOP_K, *, ensure: bool =
     index = VectorStoreIndex.from_vector_store(
         vector_store, storage_context=storage_context
     )
-    return index.as_query_engine(
+    engine = index.as_query_engine(
         similarity_top_k=similarity_top_k,
         response_mode="compact",
         text_qa_template=QA_PROMPT,
-        refine_template=REFINE_PROMPT,
     )
+    _attach_qa_prompt(engine)
+    return engine
 
 
 def main(argv: list[str] | None = None) -> None:

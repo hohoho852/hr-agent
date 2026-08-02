@@ -170,7 +170,8 @@ def _source_payload(response) -> list[dict]:
 def run_question(question: str) -> bool:
     """Run one Q&A. Returns True if a model call was attempted successfully."""
     q = (question or "").strip()
-    if not q:\n        st.warning("Enter a question first.")
+    if not q:
+        st.warning("Enter a question first.")
         return False
 
     block = _limits_block()
