@@ -26,5 +26,6 @@ All cases in `eval/golden_questions.json` should pass before opening a PR.
 
 - Do **not** commit `.env`, API keys, or real employer handbooks without rights  
 - Keep the default corpus as the sample Acme HK pack unless you own the content  
+- Keep `source/` (client-style PDFs) aligned with `data/` when you change sample policy  
 - Assistant must **inform**, not execute HR workflows  
-- This repo is **employee self-serve only** — multi-vendor implementation code belongs in `hcm-impl-copilot`
+- This repo is **employee self-serve only** — keep docs and UI on that product boundary  

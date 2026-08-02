@@ -1,4 +1,4 @@
-"""Streamlit UI — HR Agent."""
+"""Streamlit UI — HR Agent (executive-facing demo)."""
 
 from __future__ import annotations
 
@@ -32,20 +32,78 @@ EXAMPLE_QUESTIONS = [
     "When should I contact HR instead of self-serve?",
 ]
 
-st.set_page_config(page_title=PRODUCT_NAME, page_icon="📋", layout="centered")
-
-st.title(PRODUCT_NAME)
-st.caption(PRODUCT_TAGLINE)
-st.write(
-    "Ask **company policy** questions and **how to complete standard HR actions** "
-    "(leave, profile, expenses). Every answer includes **citations** from the handbook pack."
+# Executive-clean chrome: wide layout, restrained palette via custom CSS.
+st.set_page_config(
+    page_title=PRODUCT_NAME,
+    page_icon="📋",
+    layout="wide",
+    initial_sidebar_state="expanded",
 )
 
-st.info(
-    f"**Sample employer:** {SAMPLE_COMPANY_NAME} is a **fictional** company used only for this "
-    "demo handbook. Not a real employer. Not legal or HR advice. Replace `data/` with your own "
-    "licensed policies for a real deployment.",
-    icon="📘",
+st.markdown(
+    """
+<style>
+    /* Main canvas — calm, executive */
+    .block-container {
+        padding-top: 1.4rem;
+        padding-bottom: 2.5rem;
+        max-width: 920px;
+    }
+    h1 {
+        font-weight: 650 !important;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.15rem !important;
+    }
+    [data-testid="stCaption"] {
+        color: #5b6570 !important;
+        font-size: 0.98rem !important;
+    }
+    /* Soft card for the answer stream */
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        border: 1px solid #e6e9ef;
+        border-radius: 12px;
+        background: #fbfcfe;
+    }
+    /* Sidebar as product brief, not a second app */
+    section[data-testid="stSidebar"] {
+        background: #f4f6f9;
+        border-right: 1px solid #e4e8ef;
+    }
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3 {
+        letter-spacing: -0.01em;
+    }
+    .hr-kicker {
+        display: inline-block;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #3d5a80;
+        background: #e8eef6;
+        border-radius: 999px;
+        padding: 0.22rem 0.65rem;
+        margin-bottom: 0.55rem;
+    }
+    .hr-subtle {
+        color: #6b7280;
+        font-size: 0.9rem;
+        line-height: 1.45;
+    }
+    .hr-answer {
+        font-size: 1.05rem;
+        line-height: 1.55;
+        color: #111827;
+    }
+    .hr-q {
+        color: #374151;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+</style>
+""",
+    unsafe_allow_html=True,
 )
 
 # --- session state ---
@@ -62,35 +120,37 @@ if "auto_ask" not in st.session_state:
 if "input_key" not in st.session_state:
     st.session_state.input_key = 0
 
+# ---------- Sidebar: product context for evaluators ----------
 with st.sidebar:
-    st.header("About")
+    st.markdown(f"### {PRODUCT_NAME}")
+    st.caption(PRODUCT_TAGLINE)
     st.markdown(
         f"""
-**Users:** Employees  
-**Operators:** People Ops / HRIS  
+**What this is**  
+An employee assistant for **company policy** and **standard HR how-tos**, with a citation on every answer.
 
-**Job:** Policy Q&A + how-to for standard HR actions  
+**Who uses it**  
+- Employees — self-serve answers  
+- People Ops — deflect repetitive Tier-1 volume  
 
-**Sample data:** {SAMPLE_COMPANY_NAME} (fictional)
+**Hard boundary**  
+Informs only. Does **not** submit leave, change pay, or approve exceptions.
 
-**Not this product:** multi-vendor implementation guidance  
-(see `hcm-impl-copilot`)
+**Sample employer**  
+{SAMPLE_COMPANY_NAME} (fictional). Not a real company handbook.
 
-**Controls**
-- Citations always on
-- Local embeddings (BGE)
-- Generation only on retrieved snippets (DeepSeek)
-- Informs only — does not submit workflows
+**Source documents**  
+Client-style PDFs live in the repo `source/` folder (what an HR team would typically provide). The runtime index is built from `data/` (same content, machine-readable).
 """
     )
     if demo_limits_enabled():
         limit = demo_session_limit()
         st.caption(
-            f"Demo limits: {st.session_state.ask_count}/{limit} questions this session · "
-            f"{int(demo_cooldown_sec())}s cooldown between asks."
+            f"Demo session: {st.session_state.ask_count}/{limit} questions · "
+            f"{int(demo_cooldown_sec())}s between asks"
         )
     st.divider()
-    st.markdown("**Try asking**")
+    st.markdown("**Try a question**")
     for i, q in enumerate(EXAMPLE_QUESTIONS):
         if st.button(q, key=f"ex_{i}", use_container_width=True):
             st.session_state.prefill = q
@@ -98,8 +158,8 @@ with st.sidebar:
             st.session_state.input_key += 1
             st.rerun()
     st.caption(
-        "Rebuild after corpus changes: `python -m src.ingest`. "
-        "On Streamlit Cloud, the index builds automatically on first start."
+        "Replace `data/` with your licensed policies for a real tenant. "
+        "Rebuild: `python -m src.ingest`."
     )
 
 
@@ -111,26 +171,19 @@ def load_engine():
 try:
     if index_needs_build():
         with st.spinner(
-            "First start: downloading embedding model and building index from data/ "
-            "(may take several minutes)..."
+            "Preparing the handbook index (first start may take a few minutes)…"
         ):
             engine = load_engine()
     else:
-        with st.spinner("Loading retrieval engine..."):
+        with st.spinner("Loading assistant…"):
             engine = load_engine()
 except Exception as exc:  # noqa: BLE001
-    st.error(f"Could not load the query engine: {exc}")
+    st.error(f"Could not start the assistant: {exc}")
     st.info(
-        "Set `DEEPSEEK_API_KEY` in `.env` for local runs, or in Streamlit Cloud Secrets "
-        "(TOML key `DEEPSEEK_API_KEY`) for deployment. Add policy/how-to docs to `data/`. "
-        "Locally, run `python -m src.ingest`; on Streamlit Cloud the index builds on first start."
+        "Set `DEEPSEEK_API_KEY` in `.env` (local) or Streamlit Secrets (cloud). "
+        "Ensure policy documents exist under `data/`."
     )
     st.stop()
-
-st.warning(
-    "Human-in-the-loop: policy guidance only. Does not submit leave, change pay, "
-    "or grant exceptions — escalate those to HR."
-)
 
 
 def _limits_block() -> str | None:
@@ -146,12 +199,11 @@ def _limits_block() -> str | None:
     elapsed = time.time() - float(st.session_state.last_ask_ts or 0.0)
     if st.session_state.last_ask_ts and cooldown and elapsed < cooldown:
         wait = int(cooldown - elapsed) + 1
-        return f"Please wait {wait}s before the next question (demo cooldown)."
+        return f"Please wait {wait}s before the next question."
     return None
 
 
 def _keyword_terms(*texts: str) -> list[str]:
-    """Light terms for centering citation snippets on the asked topic."""
     stop = {
         "a",
         "an",
@@ -207,11 +259,6 @@ def _keyword_terms(*texts: str) -> list[str]:
 
 
 def _relevant_snippet(content: str, question: str, answer: str = "", max_len: int = 700) -> str:
-    """Show the part of the chunk that matches the question, not always the file head.
-
-    Large policy chunks often start with annual leave; marriage/other rows sit later.
-    Truncating at char 0 made Source 1 look unrelated even when the answer was grounded.
-    """
     text = (content or "").strip()
     if not text:
         return ""
@@ -231,11 +278,10 @@ def _relevant_snippet(content: str, question: str, answer: str = "", max_len: in
         snippet = text[:max_len].rstrip()
         return snippet + ("..." if len(text) > max_len else "")
 
-    # Prefer starting at a nearby markdown heading so the section title is visible.
     window_start = max(0, hit - max_len // 3)
     heading = lower.rfind("\n## ", 0, hit + 1)
     if heading >= 0 and hit - heading < max_len:
-        window_start = heading + 1  # keep '## '
+        window_start = heading + 1
 
     start = max(0, min(window_start, max(0, len(text) - max_len)))
     end = min(len(text), start + max_len)
@@ -269,7 +315,6 @@ def _source_payload(response, question: str = "", answer: str = "") -> list[dict
                 "term_hits": term_hits,
             }
         )
-    # Surface chunks that actually mention the asked topic first (still keep all).
     rows.sort(key=lambda r: (-r["term_hits"], -r["score"]))
     for r in rows:
         r.pop("term_hits", None)
@@ -277,7 +322,6 @@ def _source_payload(response, question: str = "", answer: str = "") -> list[dict
 
 
 def run_question(question: str) -> bool:
-    """Run one Q&A. Returns True if a model call was attempted successfully."""
     q = (question or "").strip()
     if not q:
         st.warning("Enter a question first.")
@@ -288,7 +332,7 @@ def run_question(question: str) -> bool:
         st.warning(block)
         return False
 
-    with st.spinner("Retrieving sources and generating answer..."):
+    with st.spinner("Finding sources and drafting an answer…"):
         try:
             response = engine.query(q)
         except Exception as exc:  # noqa: BLE001
@@ -307,7 +351,19 @@ def run_question(question: str) -> bool:
     return True
 
 
-# One-click example path (sidebar set auto_ask)
+# ---------- Main: clean executive session ----------
+st.markdown('<div class="hr-kicker">Employee self-serve</div>', unsafe_allow_html=True)
+st.title(PRODUCT_NAME)
+st.caption(PRODUCT_TAGLINE)
+
+# One quiet sample-data line — not a heavy banner stack
+st.markdown(
+    f'<p class="hr-subtle">{SAMPLE_COMPANY_NOTE} '
+    "Ask leave, profile, hybrid work, or expenses — answers cite the handbook pack.</p>",
+    unsafe_allow_html=True,
+)
+
+# Auto-run example from sidebar
 if st.session_state.auto_ask and st.session_state.prefill:
     q = st.session_state.prefill
     st.session_state.auto_ask = False
@@ -315,37 +371,51 @@ if st.session_state.auto_ask and st.session_state.prefill:
     st.session_state.input_key += 1
     st.rerun()
 
-# st.form: pressing Enter submits (fixes click-only Ask bug)
 with st.form(key=f"ask_form_{st.session_state.input_key}", clear_on_submit=True):
     query = st.text_input(
-        "Your question:",
+        "Question",
         value=st.session_state.prefill,
         placeholder="e.g. How do I request annual leave in SuccessFactors?",
+        label_visibility="collapsed",
     )
-    submitted = st.form_submit_button("Ask", type="primary")
+    cols = st.columns([1, 4])
+    with cols[0]:
+        submitted = st.form_submit_button("Ask", type="primary", use_container_width=True)
 
 if submitted:
     if run_question(query):
         st.session_state.input_key += 1
         st.rerun()
 
-# --- history ---
+# Conversation stream
 if st.session_state.history:
-    st.subheader("This session")
+    st.markdown("##### Session")
     for i, turn in enumerate(st.session_state.history):
-        st.markdown(f"**You:** {turn['question']}")
-        st.markdown(f"**HR Agent:** {turn['answer']}")
-        with st.expander("Sources (verify before acting)", expanded=False):
-            if not turn["sources"]:
-                st.write("No sources returned — do not act on an ungrounded answer.")
-            for j, src in enumerate(turn["sources"], 1):
-                st.markdown(
-                    f"**Source {j}** — `{src['file']}` (score: {src['score']:.3f})"
-                )
-                st.write(src["snippet"])
-                if j < len(turn["sources"]):
-                    st.divider()
+        with st.container(border=True):
+            st.markdown(
+                f'<div class="hr-q">You</div><div>{turn["question"]}</div>',
+                unsafe_allow_html=True,
+            )
+            st.markdown(
+                '<div class="hr-q" style="margin-top:0.85rem">HR Agent</div>',
+                unsafe_allow_html=True,
+            )
+            st.markdown(turn["answer"])
+            with st.expander("Sources — verify before acting", expanded=False):
+                if not turn["sources"]:
+                    st.write("No sources returned — do not act on an ungrounded answer.")
+                for j, src in enumerate(turn["sources"], 1):
+                    st.markdown(
+                        f"**Source {j}** · `{src['file']}` · relevance {src['score']:.2f}"
+                    )
+                    st.write(src["snippet"])
+                    if j < len(turn["sources"]):
+                        st.divider()
         if i < len(st.session_state.history) - 1:
-            st.divider()
+            st.write("")
 else:
-    st.caption(SAMPLE_COMPANY_NOTE)
+    st.markdown(
+        '<p class="hr-subtle">Start with a question above, or pick an example in the left panel. '
+        "Every answer includes sources you can open and check.</p>",
+        unsafe_allow_html=True,
+    )

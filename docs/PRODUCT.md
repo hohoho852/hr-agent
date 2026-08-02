@@ -2,8 +2,6 @@
 
 Employee policy + standard HR how-to assistant.
 
-Implementation-consultant multi-SaaS guidance is a **separate product** (`hcm-impl-copilot`).
-
 ---
 
 ## 1. Situation
@@ -20,7 +18,7 @@ Ship an assistant that:
 4. Returns **citations** on every answer  
 5. Can be **regression-tested** with a fixed question set  
 
-Out of scope: submitting workflows, payroll fixes, grievances, customer PII, implementation config guidance.
+Out of scope: submitting workflows, payroll fixes, grievances, customer PII, or implementation/configuration consulting.
 
 ## 3. Users
 
@@ -29,11 +27,13 @@ Out of scope: submitting workflows, payroll fixes, grievances, customer PII, imp
 | Employee | Policy + how-to | Completes the action or understands the rule without a ticket |
 | People Ops | Deflect Tier-1 | Lower volume on standard questions; consistent answers |
 | HRBP | Protect exceptions | Hard cases still reach humans |
+| Buyer / executive (demo) | Evaluate fit | Clean main experience; clear source story |
 
 ## 4. Architecture
 
 ```text
-data/*.md (policy + how-to)
+Client docs (PDF/DOCX)  →  source/ (sample pack for audience)
+                            data/  (runtime corpus; md or extracted text)
   → chunk 800 / overlap 120
   → local BGE → Chroma
   → top_k=4 → DeepSeek answer + citations
@@ -47,6 +47,7 @@ data/*.md (policy + how-to)
 | Local embeddings | Keep full handbook text on-machine |
 | Inform ≠ execute | Clear authZ / liability boundary |
 | Sample corpus in repo | Safe default; swap in licensed policies for production |
+| `source/` PDFs | Show what client input looks like before indexing |
 
 ## 5. Evaluation
 
@@ -62,14 +63,6 @@ Baseline on the Acme HK sample pack: 7/7 pass.
 - Citations + human-in-the-loop copy in the UI  
 - No workflow execution  
 - Escalate exceptions, pay, and grievances  
-- Secrets only via `.env` (never committed)
+- Secrets only via `.env` / platform secrets (never committed)
 
 Production add-ons when you wire a real tenant: SSO, DLP, private LLM endpoint, deflection analytics.
-
-## 7. Boundary vs HCM Implementation Copilot
-
-| | HR Agent | HCM Implementation Copilot |
-|--|----------|----------------------------|
-| Audience | Employees | Impl consultants / HRIS / SI |
-| Content | Policy + HRIS how-tos | Vendor config / prep guidance |
-| Risk focus | Wrong employee advice; over-automation | Cross-vendor bleed; bad tenant changes |
