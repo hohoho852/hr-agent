@@ -9,6 +9,8 @@ Answers common questions (leave, hybrid work, expenses, profile updates) with **
 **Scope:** employee self-serve only.  
 Implementation guidance for SuccessFactors / Oracle Fusion / Workday lives in a separate product: [`hcm-impl-copilot`](https://github.com/hohoho852/hcm-impl-copilot) (when published).
 
+**Live demo:** [hr-agent-hohoho852.streamlit.app](https://hr-agent-hohoho852.streamlit.app/)
+
 ---
 
 ## What it does
@@ -84,6 +86,8 @@ First ingest downloads the local embedding model (one-time).
 ## Deploy on Streamlit Community Cloud
 
 No Docker required. Point Streamlit at this repo with **Main file:** `app.py`.
+
+**Public demo:** this deployment is open so visitors can try the product from the README. The API key stays in Streamlit Secrets (never in the repo or browser). Protect spend with a **demo-only key**, provider billing alerts, and (recommended) app rate limits — not by hiding the URL.
 
 **Secrets (TOML):**
 
