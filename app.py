@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+import time
 from pathlib import Path
 
 import streamlit as st
@@ -11,8 +12,25 @@ ROOT = Path(__file__).resolve().parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.config import PRODUCT_NAME, PRODUCT_TAGLINE
+from src.config import (
+    PRODUCT_NAME,
+    PRODUCT_TAGLINE,
+    SAMPLE_COMPANY_NAME,
+    SAMPLE_COMPANY_NOTE,
+    demo_cooldown_sec,
+    demo_limits_enabled,
+    demo_session_limit,
+)
 from src.query import get_query_engine, index_needs_build
+
+EXAMPLE_QUESTIONS = [
+    "How many annual leave days do I get?",
+    "How do I request time off in SuccessFactors?",
+    "How do I update my home address?",
+    "What is the default hybrid work pattern?",
+    "How do I submit an expense claim?",
+    "When should I contact HR instead of self-serve?",
+]
 
 st.set_page_config(page_title=PRODUCT_NAME, page_icon="📋", layout="centered")
 
@@ -23,14 +41,37 @@ st.write(
     "(leave, profile, expenses). Every answer includes **citations** from the handbook pack."
 )
 
+st.info(
+    f"**Sample employer:** {SAMPLE_COMPANY_NAME} is a **fictional** company used only for this "
+    "demo handbook. Not a real employer. Not legal or HR advice. Replace `data/` with your own "
+    "licensed policies for a real deployment.",
+    icon="📘",
+)
+
+# --- session state ---
+if "history" not in st.session_state:
+    st.session_state.history = []
+if "ask_count" not in st.session_state:
+    st.session_state.ask_count = 0
+if "last_ask_ts" not in st.session_state:
+    st.session_state.last_ask_ts = 0.0
+if "prefill" not in st.session_state:
+    st.session_state.prefill = ""
+if "auto_ask" not in st.session_state:
+    st.session_state.auto_ask = False
+if "input_key" not in st.session_state:
+    st.session_state.input_key = 0
+
 with st.sidebar:
     st.header("About")
     st.markdown(
-        """
+        f"""
 **Users:** Employees  
 **Operators:** People Ops / HRIS  
 
 **Job:** Policy Q&A + how-to for standard HR actions  
+
+**Sample data:** {SAMPLE_COMPANY_NAME} (fictional)
 
 **Not this product:** multi-vendor implementation guidance  
 (see `hcm-impl-copilot`)
@@ -40,26 +81,22 @@ with st.sidebar:
 - Local embeddings (BGE)
 - Generation only on retrieved snippets (DeepSeek)
 - Informs only — does not submit workflows
-
-**Stack**
-- LLM: DeepSeek
-- Embeddings: local `BAAI/bge-small-en-v1.5`
-- Vector store: Chroma
-- Orchestration: LlamaIndex
 """
     )
+    if demo_limits_enabled():
+        limit = demo_session_limit()
+        st.caption(
+            f"Demo limits: {st.session_state.ask_count}/{limit} questions this session · "
+            f"{int(demo_cooldown_sec())}s cooldown between asks."
+        )
     st.divider()
     st.markdown("**Try asking**")
-    st.markdown(
-        """
-- How many annual leave days do I get?
-- How do I request time off in SuccessFactors?
-- How do I update my home address?
-- Can I work from overseas?
-- How do I submit an expense claim?
-- When should I contact HR instead of self-serve?
-"""
-    )
+    for i, q in enumerate(EXAMPLE_QUESTIONS):
+        if st.button(q, key=f"ex_{i}", use_container_width=True):
+            st.session_state.prefill = q
+            st.session_state.auto_ask = True
+            st.session_state.input_key += 1
+            st.rerun()
     st.caption(
         "Rebuild after corpus changes: `python -m src.ingest`. "
         "On Streamlit Cloud, the index builds automatically on first start."
@@ -90,39 +127,115 @@ except Exception as exc:  # noqa: BLE001
     )
     st.stop()
 
-st.info(
+st.warning(
     "Human-in-the-loop: policy guidance only. Does not submit leave, change pay, "
-    "or grant exceptions — escalate those to HR.",
-    icon="⚠️",
+    "or grant exceptions — escalate those to HR."
 )
 
-query = st.text_input(
-    "Your question:",
-    placeholder="e.g. How do I request annual leave in SuccessFactors?",
-)
-ask = st.button("Ask", type="primary")
 
-if ask and query.strip():
+def _limits_block() -> str | None:
+    if not demo_limits_enabled():
+        return None
+    limit = demo_session_limit()
+    if limit and st.session_state.ask_count >= limit:
+        return (
+            f"Demo session limit reached ({limit} questions). "
+            "Clone the repo and run locally with your own `DEEPSEEK_API_KEY` for unlimited use."
+        )
+    cooldown = demo_cooldown_sec()
+    elapsed = time.time() - float(st.session_state.last_ask_ts or 0.0)
+    if st.session_state.last_ask_ts and cooldown and elapsed < cooldown:
+        wait = int(cooldown - elapsed) + 1
+        return f"Please wait {wait}s before the next question (demo cooldown)."
+    return None
+
+
+def _source_payload(response) -> list[dict]:
+    rows: list[dict] = []
+    for node in response.source_nodes or []:
+        meta = node.metadata or {}
+        fname = meta.get("file_name") or meta.get("filename") or "Unknown"
+        score = node.score if node.score is not None else 0.0
+        content = node.node.get_content()
+        rows.append(
+            {
+                "file": fname,
+                "score": float(score),
+                "snippet": (content[:500] + "...") if len(content) > 500 else content,
+            }
+        )
+    return rows
+
+
+def run_question(question: str) -> bool:
+    """Run one Q&A. Returns True if a model call was attempted successfully."""
+    q = (question or "").strip()
+    if not q:\n        st.warning("Enter a question first.")
+        return False
+
+    block = _limits_block()
+    if block:
+        st.warning(block)
+        return False
+
     with st.spinner("Retrieving sources and generating answer..."):
         try:
-            response = engine.query(query.strip())
+            response = engine.query(q)
         except Exception as exc:  # noqa: BLE001
             st.error(f"Query failed: {exc}")
-            st.stop()
+            return False
 
-    st.subheader("Answer")
-    st.write(response.response)
+    answer = response.response or ""
+    sources = _source_payload(response)
+    st.session_state.history.insert(
+        0,
+        {"question": q, "answer": answer, "sources": sources},
+    )
+    st.session_state.ask_count += 1
+    st.session_state.last_ask_ts = time.time()
+    st.session_state.prefill = ""
+    return True
 
-    with st.expander("Sources (verify before acting)", expanded=True):
-        if not response.source_nodes:
-            st.write("No sources returned — do not act on an ungrounded answer.")
-        for i, node in enumerate(response.source_nodes, 1):
-            meta = node.metadata or {}
-            fname = meta.get("file_name") or meta.get("filename") or "Unknown"
-            score = node.score if node.score is not None else 0.0
-            st.markdown(f"**Source {i}** — `{fname}` (score: {score:.3f})")
-            content = node.node.get_content()
-            st.write((content[:500] + "...") if len(content) > 500 else content)
+
+# One-click example path (sidebar set auto_ask)
+if st.session_state.auto_ask and st.session_state.prefill:
+    q = st.session_state.prefill
+    st.session_state.auto_ask = False
+    run_question(q)
+    st.session_state.input_key += 1
+    st.rerun()
+
+# st.form: pressing Enter submits (fixes click-only Ask bug)
+with st.form(key=f"ask_form_{st.session_state.input_key}", clear_on_submit=True):
+    query = st.text_input(
+        "Your question:",
+        value=st.session_state.prefill,
+        placeholder="e.g. How do I request annual leave in SuccessFactors?",
+    )
+    submitted = st.form_submit_button("Ask", type="primary")
+
+if submitted:
+    if run_question(query):
+        st.session_state.input_key += 1
+        st.rerun()
+
+# --- history ---
+if st.session_state.history:
+    st.subheader("This session")
+    for i, turn in enumerate(st.session_state.history):
+        st.markdown(f"**You:** {turn['question']}")
+        st.markdown(f"**HR Agent:** {turn['answer']}")
+        with st.expander("Sources (verify before acting)", expanded=False):
+            if not turn["sources"]:
+                st.write("No sources returned — do not act on an ungrounded answer.")
+            for j, src in enumerate(turn["sources"], 1):
+                st.markdown(
+                    f"**Source {j}** — `{src['file']}` (score: {src['score']:.3f})"
+                )
+                st.write(src["snippet"])
+                if j < len(turn["sources"]):
+                    st.divider()
+        if i < len(st.session_state.history) - 1:
             st.divider()
-elif ask:
-    st.warning("Enter a question first.")
+else:
+    st.caption(SAMPLE_COMPANY_NOTE)

@@ -87,7 +87,7 @@ First ingest downloads the local embedding model (one-time).
 
 No Docker required. Point Streamlit at this repo with **Main file:** `app.py`.
 
-**Public demo:** this deployment is open so visitors can try the product from the README. The API key stays in Streamlit Secrets (never in the repo or browser). Protect spend with a **demo-only key**, provider billing alerts, and (recommended) app rate limits — not by hiding the URL.
+**Public demo:** this deployment is open so visitors can try the product from the README. The API key stays in Streamlit Secrets (never in the repo or browser). Protect spend with a **demo-only key**, provider billing alerts, and app session limits (10 questions per browser session, 5s cooldown — override via `DEMO_SESSION_LIMIT`, `DEMO_COOLDOWN_SEC`, or set `DEMO_LIMITS=0` to disable).
 
 **Secrets (TOML):**
 
@@ -125,7 +125,7 @@ hr-agent/
 
 ## Sample corpus
 
-Bundled **Acme HK** pack — sample content for local runs, **not** a real employer handbook:
+Bundled **Acme Hong Kong** pack — a **fictional** sample employer for local/demo runs. **Not a real company** and **not** a real employer handbook:
 
 | File | Content |
 |------|---------|
@@ -139,6 +139,8 @@ Bundled **Acme HK** pack — sample content for local runs, **not** a real emplo
 | `08_hr_contact_and_escalation.md` | Self-serve vs HR ticket |
 
 Replace `data/` with your own licensed policies for a real deployment.
+
+**Public demo limits:** the live Streamlit app caps questions per browser session (default 10) with a short cooldown to control API spend. Set `DEMO_LIMITS=0` locally to disable. Override with `DEMO_SESSION_LIMIT` / `DEMO_COOLDOWN_SEC`.
 
 ---
 
@@ -164,6 +166,7 @@ On the sample pack: **7/7** pass. Report: `eval/last_report.json`.
 - Citations always shown in the UI
 - No workflow execution; no invented personal leave balances
 - Escalation copy for exceptions, payroll, grievances
+- Public demo: session limits count **attempted model calls** (default 10/session, 5s cooldown)
 - `.env` is gitignored — never commit API keys
 
 For a live tenant deploy, add SSO, DLP/redaction, private model endpoint, and deflection analytics as needed.

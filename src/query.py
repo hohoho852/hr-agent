@@ -7,15 +7,48 @@ import sys
 from pathlib import Path
 
 import chromadb
-from llama_index.core import StorageContext, VectorStoreIndex
+from llama_index.core import PromptTemplate, StorageContext, VectorStoreIndex
 from llama_index.vector_stores.chroma import ChromaVectorStore
 
 from src.config import (
     COLLECTION_NAME,
     PERSIST_DIR,
+    QA_SYSTEM_PROMPT,
     SIMILARITY_TOP_K,
     configure_settings,
     project_root,
+)
+
+QA_PROMPT = PromptTemplate(
+    QA_SYSTEM_PROMPT
+    + "\n\nContext information is below.\n"
+    "---------------------\n"
+    "{context_str}\n"
+    "---------------------\n"
+    "Given the context only, answer the employee question.\n"
+    "Question: {query_str}\n"
+    "Answer: "
+)
+
+REFINE_PROMPT = PromptTemplate(
+    """The original query is as follows: {query_str}
+We have provided an existing answer: {existing_answer}
+We have the opportunity to refine the existing answer (only if needed) with some more \
+context below.
+
+Instructions (same as before):
+- Answer ONLY from the retrieved context — not general knowledge.
+- For how-to questions, prefer short numbered steps.
+- If context is insufficient, say so and suggest an HR ticket.
+- Inform ≠ execute: never claim workflow submission or approvals.
+- Escalate exceptions, payroll, grievances, and sensitive cases to HR.
+
+------------
+{context_msg}
+------------
+Given the new context, refine the original answer to better answer the query. If the \
+context isn't useful, return the original answer.
+Refined Answer: """
 )
 
 
@@ -67,6 +100,8 @@ def get_query_engine(similarity_top_k: int = SIMILARITY_TOP_K, *, ensure: bool =
     return index.as_query_engine(
         similarity_top_k=similarity_top_k,
         response_mode="compact",
+        text_qa_template=QA_PROMPT,
+        refine_template=REFINE_PROMPT,
     )
 
 

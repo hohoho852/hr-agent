@@ -28,6 +28,49 @@ LLM_MODEL_NAME = "deepseek-chat"
 PRODUCT_NAME = "HR Agent"
 PRODUCT_TAGLINE = "Company policy + standard HR how-tos, with citations"
 
+# Bundled handbook uses a fictional sample employer (not a real company).
+SAMPLE_COMPANY_NAME = "Acme Hong Kong"
+SAMPLE_COMPANY_NOTE = (
+    "Demo corpus uses a fictional sample employer (Acme Hong Kong). "
+    "Not a real company handbook. Not legal or HR advice."
+)
+
+QA_SYSTEM_PROMPT = """You are HR Agent, an employee self-serve assistant for company policy and standard HR how-tos.
+
+Rules:
+1. Answer ONLY from the retrieved handbook / how-to context. If context is insufficient, say you do not have enough information and suggest opening an HR ticket.
+2. For how-to questions, prefer short numbered steps employees can follow in the HRIS.
+3. Stay concise. Lead with the direct answer, then steps or conditions.
+4. Inform ≠ execute: never claim you submitted leave, changed pay, updated a profile, or approved an exception.
+5. Escalate to HR (do not invent approvals) for exceptions, payroll issues, grievances, legal/medical edge cases, or anything needing a human decision.
+6. Do not invent personal balances, other employees' data, or policies not in the sources.
+7. The bundled demo corpus describes a fictional sample employer (Acme Hong Kong) unless the operator replaced the data pack.
+"""
+
+
+def _env_int(name: str, default: int) -> int:
+    raw = (os.environ.get(name) or "").strip()
+    if not raw:
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        return default
+
+
+def demo_limits_enabled() -> bool:
+    """Return False when DEMO_LIMITS=0 (unlimited asks)."""
+    flag = (os.environ.get("DEMO_LIMITS") or "1").strip().lower()
+    return flag not in {"0", "false", "off", "no"}
+
+
+def demo_session_limit() -> int:
+    return max(0, _env_int("DEMO_SESSION_LIMIT", 10))
+
+
+def demo_cooldown_sec() -> float:
+    return max(0.0, float(_env_int("DEMO_COOLDOWN_SEC", 5)))
+
 
 def project_root() -> Path:
     return PROJECT_ROOT

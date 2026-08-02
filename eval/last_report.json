@@ -4,16 +4,16 @@
   "pass_rate": 1.0,
   "keyword_hit_rate": 1.0,
   "retrieval_hit_rate": 1.0,
-  "avg_latency_s": 1.429,
+  "avg_latency_s": 1.9,
   "results": [
     {
       "id": "b_al_entitlement",
       "question": "How many annual leave days do full-time employees get per leave year?",
-      "latency_s": 1.495,
+      "latency_s": 1.314,
       "keyword_hit": true,
       "retrieval_hit": true,
       "pass": true,
-      "answer_preview": "Full-time employees on Acme Hong Kong payroll receive 15 working days of annual leave per leave year after probation confirmation.",
+      "answer_preview": "Based on the provided policy, full-time employees on Acme Hong Kong payroll get **15 working days** of annual leave per leave year after probation confirmation.",
       "top_files": [
         "02_leave_and_time_off_policy.md",
         "03_how_to_request_time_off.md",
@@ -24,11 +24,11 @@
     {
       "id": "b_request_time_off",
       "question": "How do I request annual leave in SuccessFactors?",
-      "latency_s": 1.728,
+      "latency_s": 2.061,
       "keyword_hit": true,
       "retrieval_hit": true,
       "pass": true,
-      "answer_preview": "To request annual leave in SuccessFactors, sign in and go to the **Time Off** section from the home page or use the global search. Select **Request Time Off** or **New Absence**, then choose **Annual Leave** as the time type. Enter your start and end dates\u2014if you need a half-day,",
+      "answer_preview": "Based on the provided how-to guide, here are the steps to request annual leave in SuccessFactors:\n\n1. Sign in to **SAP SuccessFactors**.\n2. Open the **home** page and select **Time Off** (or search \"Time Off\" in the global search).\n3. Choose **Request Time Off** (or **New Absence",
       "top_files": [
         "03_how_to_request_time_off.md",
         "05_how_to_update_personal_info.md",
@@ -39,11 +39,11 @@
     {
       "id": "b_sick_cert",
       "question": "When do I need a medical certificate for sick leave?",
-      "latency_s": 1.329,
+      "latency_s": 1.718,
       "keyword_hit": true,
       "retrieval_hit": true,
       "pass": true,
-      "answer_preview": "You need a medical certificate for sick leave if you are taking **2 or more consecutive calendar days** off due to illness. A certificate may also be required for any sick day that falls adjacent to a public holiday or annual leave, if your manager requests it.",
+      "answer_preview": "Based on the provided policy, you need a medical certificate for sick leave in the following situations:\n\n1. **For 2 or more consecutive calendar days** of sick leave.\n2. **For any day adjacent to a public holiday or annual leave**, if requested by your manager.\n\nAdditionally, th",
       "top_files": [
         "03_how_to_request_time_off.md",
         "03_how_to_request_time_off.md",
@@ -54,11 +54,11 @@
     {
       "id": "b_update_address",
       "question": "How do I update my home address in SuccessFactors?",
-      "latency_s": 1.284,
+      "latency_s": 2.248,
       "keyword_hit": true,
       "retrieval_hit": true,
       "pass": true,
-      "answer_preview": "To update your home address in SuccessFactors, sign in and click your name or photo in the top right, then select \"Show profile\" or \"Personal Information.\" Navigate to the \"Addresses\" section, click the pencil or Edit icon, enter your new home address, set the effective date for ",
+      "answer_preview": "Based on the provided guide, here are the steps to update your home address in SuccessFactors:\n\n1. Sign in to **SAP SuccessFactors**.\n2. Click your **name / photo** (top right) \u2192 **Show profile** / **Personal Information**.\n   - Alternate: search **\"Personal Information\"** or ope",
       "top_files": [
         "05_how_to_update_personal_info.md",
         "03_how_to_request_time_off.md",
@@ -69,11 +69,11 @@
     {
       "id": "b_hybrid_default",
       "question": "What is the default hybrid work pattern?",
-      "latency_s": 1.072,
+      "latency_s": 1.12,
       "keyword_hit": true,
       "retrieval_hit": true,
       "pass": true,
-      "answer_preview": "The default hybrid work pattern is 3 days in the office and 2 days remote per week, unless the role is office-mandatory.",
+      "answer_preview": "Based on the provided context, the default hybrid work pattern is **3 days in office / 2 days remote** per week, unless the role is office-mandatory.",
       "top_files": [
         "06_hybrid_work_and_attendance_policy.md",
         "08_hr_contact_and_escalation.md",
@@ -84,11 +84,11 @@
     {
       "id": "b_expense_steps",
       "question": "How do I submit an expense claim and what receipt threshold applies?",
-      "latency_s": 1.74,
+      "latency_s": 2.261,
       "keyword_hit": true,
       "retrieval_hit": true,
       "pass": true,
-      "answer_preview": "To submit an expense claim, sign in to SuccessFactors and open the Expenses or My Expenses tile. Click Create expense report or New claim, then enter a report name. Add an expense line for each item, including the date, category, amount and currency, and a business purpose. Attac",
+      "answer_preview": "Based on the provided handbook, here is how to submit an expense claim and the receipt threshold that applies:\n\n**Receipt Threshold:**\n- Receipts are required for any item **\u2265 HKD 100**. Receipts are always preferred, even for smaller amounts.\n\n**Steps to Submit an Expense Claim:",
       "top_files": [
         "07_how_to_submit_expense_claim.md",
         "08_hr_contact_and_escalation.md",
@@ -99,11 +99,11 @@
     {
       "id": "b_when_contact_hr",
       "question": "When should I contact HR instead of using self-serve?",
-      "latency_s": 1.353,
+      "latency_s": 2.576,
       "keyword_hit": true,
       "retrieval_hit": true,
       "pass": true,
-      "answer_preview": "You should contact HR instead of using self-serve when you need an exception to policy (such as extra leave, unpaid leave, or remote work abroad for more than five days), have a payroll discrepancy or wrong pay, need to report harassment, a grievance, or a performance dispute, re",
+      "answer_preview": "Based on the provided context, you should contact HR (open a ticket) instead of using self-serve for the following situations:\n\n- **Exception to policy** (extra leave, unpaid leave, remote abroad >5 days)\n- **Payroll discrepancy / wrong pay**\n- **Harassment, grievance, performanc",
       "top_files": [
         "08_hr_contact_and_escalation.md",
         "04_personal_data_and_profile_policy.md",
