@@ -392,10 +392,8 @@ if st.session_state.history:
     st.markdown("##### Session")
     for i, turn in enumerate(st.session_state.history):
         with st.container(border=True):
-            st.markdown(
-                f'<div class="hr-q">You</div><div>{turn["question"]}</div>',
-                unsafe_allow_html=True,
-            )
+            st.markdown('<div class="hr-q">You</div>', unsafe_allow_html=True)
+            st.markdown(turn["question"])
             st.markdown(
                 '<div class="hr-q" style="margin-top:0.85rem">HR Agent</div>',
                 unsafe_allow_html=True,

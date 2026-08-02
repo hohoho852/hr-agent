@@ -1,6 +1,6 @@
 """Runtime config — HR Agent.
 
-Employee self-serve only. No implementation-consultant / multi-SaaS code paths.
+Employee self-serve only - company policy and standard HR how-tos.
 """
 
 from __future__ import annotations
