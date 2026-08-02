@@ -150,28 +150,136 @@ def _limits_block() -> str | None:
     return None
 
 
-def _source_payload(response) -> list[dict]:
+def _keyword_terms(*texts: str) -> list[str]:
+    """Light terms for centering citation snippets on the asked topic."""
+    stop = {
+        "a",
+        "an",
+        "the",
+        "and",
+        "or",
+        "to",
+        "of",
+        "in",
+        "on",
+        "for",
+        "do",
+        "we",
+        "i",
+        "my",
+        "is",
+        "are",
+        "how",
+        "many",
+        "much",
+        "what",
+        "when",
+        "where",
+        "who",
+        "with",
+        "from",
+        "this",
+        "that",
+        "have",
+        "has",
+        "get",
+        "got",
+        "can",
+        "you",
+        "your",
+        "our",
+        "me",
+        "please",
+        "about",
+        "does",
+        "did",
+    }
+    seen: set[str] = set()
+    out: list[str] = []
+    for text in texts:
+        for raw in (text or "").lower().replace("?", " ").replace(",", " ").split():
+            tok = "".join(ch for ch in raw if ch.isalnum() or ch in "-_")
+            if len(tok) < 3 or tok in stop or tok in seen:
+                continue
+            seen.add(tok)
+            out.append(tok)
+    return out
+
+
+def _relevant_snippet(content: str, question: str, answer: str = "", max_len: int = 700) -> str:
+    """Show the part of the chunk that matches the question, not always the file head.
+
+    Large policy chunks often start with annual leave; marriage/other rows sit later.
+    Truncating at char 0 made Source 1 look unrelated even when the answer was grounded.
+    """
+    text = (content or "").strip()
+    if not text:
+        return ""
+    if len(text) <= max_len:
+        return text
+
+    lower = text.lower()
+    terms = _keyword_terms(question, answer)
+    hit = -1
+    for term in terms:
+        idx = lower.find(term)
+        if idx >= 0:
+            hit = idx
+            break
+
+    if hit < 0:
+        snippet = text[:max_len].rstrip()
+        return snippet + ("..." if len(text) > max_len else "")
+
+    # Prefer starting at a nearby markdown heading so the section title is visible.
+    window_start = max(0, hit - max_len // 3)
+    heading = lower.rfind("\n## ", 0, hit + 1)
+    if heading >= 0 and hit - heading < max_len:
+        window_start = heading + 1  # keep '## '
+
+    start = max(0, min(window_start, max(0, len(text) - max_len)))
+    end = min(len(text), start + max_len)
+    if hit >= end or hit < start:
+        start = max(0, hit - max_len // 3)
+        end = min(len(text), start + max_len)
+
+    snippet = text[start:end].strip()
+    if start > 0:
+        snippet = "..." + snippet
+    if end < len(text):
+        snippet = snippet + "..."
+    return snippet
+
+
+def _source_payload(response, question: str = "", answer: str = "") -> list[dict]:
     rows: list[dict] = []
+    terms = _keyword_terms(question, answer)
     for node in response.source_nodes or []:
         meta = node.metadata or {}
         fname = meta.get("file_name") or meta.get("filename") or "Unknown"
         score = node.score if node.score is not None else 0.0
         content = node.node.get_content()
+        lower = (content or "").lower()
+        term_hits = sum(1 for t in terms if t in lower)
         rows.append(
             {
                 "file": fname,
                 "score": float(score),
-                "snippet": (content[:500] + "...") if len(content) > 500 else content,
+                "snippet": _relevant_snippet(content, question, answer),
+                "term_hits": term_hits,
             }
         )
+    # Surface chunks that actually mention the asked topic first (still keep all).
+    rows.sort(key=lambda r: (-r["term_hits"], -r["score"]))
+    for r in rows:
+        r.pop("term_hits", None)
     return rows
 
 
 def run_question(question: str) -> bool:
     """Run one Q&A. Returns True if a model call was attempted successfully."""
     q = (question or "").strip()
-    if not q:
-        st.warning("Enter a question first.")
+    if not q:\n        st.warning("Enter a question first.")
         return False
 
     block = _limits_block()
@@ -187,7 +295,7 @@ def run_question(question: str) -> bool:
             return False
 
     answer = response.response or ""
-    sources = _source_payload(response)
+    sources = _source_payload(response, question=q, answer=answer)
     st.session_state.history.insert(
         0,
         {"question": q, "answer": answer, "sources": sources},
