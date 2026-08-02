@@ -1,4 +1,4 @@
-# Leave and Time Off Policy (Acme HK — Demo)
+# Leave and Time Off Policy (Acme HK)
 
 **Document type:** Company policy  
 **Applies to:** Full-time employees on Acme Hong Kong payroll  

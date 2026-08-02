@@ -1,4 +1,4 @@
-# How to Request Time Off in SuccessFactors (Employee Guide — Demo)
+# How to Request Time Off in SuccessFactors (Employee Guide)
 
 **Audience:** Employees  
 **System path:** SuccessFactors → Time Off  

@@ -1,4 +1,4 @@
-# How to Update Personal Information in SuccessFactors (Employee Guide — Demo)
+# How to Update Personal Information in SuccessFactors (Employee Guide)
 
 **Audience:** Employees  
 **System path:** SuccessFactors → Personal Information / People Profile  

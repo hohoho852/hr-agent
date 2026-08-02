@@ -1,6 +1,6 @@
 # Contributing
 
-This is a **portfolio demo** of **HR Agent** — an employee policy + how-to RAG assistant.
+HR Agent — employee policy + how-to assistant.
 
 ## Local setup
 
@@ -9,7 +9,7 @@ python3 -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 cp .env.example .env
-# edit .env — set DEEPSEEK_API_KEY
+# set DEEPSEEK_API_KEY
 python -m src.ingest
 streamlit run app.py
 ```
@@ -20,11 +20,11 @@ streamlit run app.py
 python -m src.eval
 ```
 
-All golden cases should pass before opening a PR.
+All cases in `eval/golden_questions.json` should pass before opening a PR.
 
 ## Rules
 
-- Do **not** commit `.env`, API keys, or real employer handbooks
-- Keep the corpus **synthetic** (Acme HK demo pack) unless you have rights to share real policies
-- Assistant must **inform**, not execute HR workflows
-- This repo is **employee self-serve only** — implementation-consultant multi-SaaS code belongs elsewhere
+- Do **not** commit `.env`, API keys, or real employer handbooks without rights  
+- Keep the default corpus as the sample Acme HK pack unless you own the content  
+- Assistant must **inform**, not execute HR workflows  
+- This repo is **employee self-serve only** — multi-vendor implementation code belongs in `hcm-impl-copilot`

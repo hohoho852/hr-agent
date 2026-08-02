@@ -1,4 +1,4 @@
-# Personal Data and Employee Profile Policy (Acme HK — Demo)
+# Personal Data and Employee Profile Policy (Acme HK)
 
 **Document type:** Company policy + privacy summary  
 **System:** SuccessFactors Employee Central — Employee Profile / People Profile  

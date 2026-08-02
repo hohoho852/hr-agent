@@ -1,6 +1,6 @@
-# Acme Hong Kong Employee Handbook — Overview (Demo Policy Pack)
+# Acme Hong Kong Employee Handbook — Overview
 
-**Document type:** Company HR policy (synthetic portfolio demo)  
+**Document type:** Company HR policy (sample)  
 **Audience:** All employees  
 **Owner:** People Operations  
 **Effective date:** 2026-01-01  
@@ -14,7 +14,7 @@
 This handbook summarizes **standard company policies** and **how employees complete common HR actions** in SuccessFactors. It is designed so employees can self-serve routine questions instead of ticketting HR for the same answers.
 
 **Important**
-- This pack is a **synthetic demo corpus** for an AI portfolio project. It is not Acme legal advice and not a real customer policy.
+- This pack is **sample content** for local development. It is not Acme legal advice and not a real customer policy.
 - AI answers must cite the source section. Employees still follow manager / HR guidance when rules conflict.
 - The assistant **explains policy and steps**. It does **not** submit transactions, approve leave, or change payroll.
 

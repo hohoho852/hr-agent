@@ -1,6 +1,6 @@
-"""Runtime config — HR Agent (Track B portfolio product).
+"""Runtime config — HR Agent.
 
-Single product. No implementation-consultant / multi-SaaS code paths.
+Employee self-serve only. No implementation-consultant / multi-SaaS code paths.
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ EMBED_MODEL_NAME = "BAAI/bge-small-en-v1.5"
 LLM_MODEL_NAME = "deepseek-chat"
 
 PRODUCT_NAME = "HR Agent"
-PRODUCT_TAGLINE = "Company policy + standard HR how-tos — deflect Tier-1 tickets"
+PRODUCT_TAGLINE = "Company policy + standard HR how-tos, with citations"
 
 
 def project_root() -> Path:

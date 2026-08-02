@@ -1,4 +1,4 @@
-# How to Submit an Expense Claim (Employee Guide — Demo)
+# How to Submit an Expense Claim (Employee Guide)
 
 **Audience:** Employees  
 **System:** SuccessFactors / connected Expense module (demo assumes **Expenses** tile)  

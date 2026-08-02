@@ -1,30 +1,29 @@
-# Publish checklist (GitHub)
+# Release checklist
 
-Local prep is done when `git log` shows the initial commit and `git status` is clean.
+Use when cutting a public release of this repo.
 
-## When your new GitHub account exists
-
-1. Repo is published: **https://github.com/hohoho852/hr-agent** (public).
-2. Local path matches:
+## Remote
 
 ```bash
 cd ~/Projects/hr-agent
 git remote -v   # origin → https://github.com/hohoho852/hr-agent.git
-git push -u origin main
+git status
+git push origin main
 ```
 
-3. GitHub repo settings (recommended for portfolio):
-   - Description: `HR Agent — employee policy + how-to RAG with citations (Tier-1 deflection)`
-   - Topics: `rag`, `hr`, `streamlit`, `llamaindex`, `portfolio`, `deepseek`
-   - About → link case study path in README
+## Repo settings
+
+- Description: `Employee policy + HR how-to assistant with citations`
+- Topics: `rag`, `hr`, `streamlit`, `llamaindex`, `deepseek`
+- About → points at README
 
 ## Never push
 
-- `.env` (gitignored)
-- `chroma_db/` (rebuilt by ingest)
+- `.env`
+- `chroma_db/` (rebuild with ingest)
 - `.venv/`
-- Real employer policy PDFs or PII
+- Real employer policies or PII without rights
 
-## After first push
+## Optional
 
-Optional: add screenshots under `docs/screenshots/` and link them from README.
+Screenshots under `docs/screenshots/` linked from the README.

@@ -2,41 +2,38 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**HR Agent** — employee policy + how-to assistant (RAG). Portfolio project: a **production-style HR knowledge assistant** that answers:
+Employee-facing assistant for **company policy** and **standard HR how-tos**.
 
-1. **Company policy** questions (leave, hybrid work, expenses, privacy)
-2. **How to perform standard HR actions** in the HRIS (request time off, update profile, submit expenses)
+Answers common questions (leave, hybrid work, expenses, profile updates) with **citations** from the handbook pack. Designed so People Ops can deflect repetitive Tier-1 volume without the bot approving leave, changing pay, or handling exceptions.
 
-**Goal:** deflect Tier-1 tickets and relieve People Ops of repetitive answers — with **citations** on every response.
-
-> **Scope:** employee self-serve only.  
-> Multi-SaaS implementation copilot (SuccessFactors / Oracle Fusion / Workday) is a **separate product**, not in this repo.
+**Scope:** employee self-serve only.  
+Implementation guidance for SuccessFactors / Oracle Fusion / Workday lives in a separate product: [`hcm-impl-copilot`](https://github.com/hohoho852/hcm-impl-copilot) (when published).
 
 ---
 
-## Why this exists
+## What it does
 
 | | |
 |---|---|
-| **Problem** | HR answers the same policy and “how do I…?” questions all day |
+| **Problem** | The same policy and “how do I…?” questions hit HR every day |
 | **Users** | Employees |
-| **Buyer signal** | CHRO / People Ops (ticket deflection, answer consistency) |
-| **Why RAG** | Policies change; answers must be source-linked |
-| **Hard rule** | **Inform ≠ execute** — no submitting leave/pay/workflows; exceptions → HR ticket |
+| **Operators** | People Ops / HRIS |
+| **Behavior** | Retrieve handbook + how-to sources → answer with citations |
+| **Hard rule** | **Inform ≠ execute** — no workflow submission; exceptions go to HR |
 
-Full narrative: [`docs/CASE_STUDY.md`](docs/CASE_STUDY.md)
+Design notes: [`docs/PRODUCT.md`](docs/PRODUCT.md)
 
 ---
 
-## Demo (30 seconds)
+## Example
 
 ```text
 You:  How do I request annual leave in SuccessFactors?
 Bot:  Open Time Off → Request Time Off → choose Annual Leave → dates → Submit…
-      + source citations from the leave how-to + policy pack
+      + source citations from the leave how-to and policy pack
 ```
 
-Other good prompts:
+Other prompts that work well:
 
 - How many annual leave days do full-time employees get?
 - When do I need a medical certificate for sick leave?
@@ -51,11 +48,11 @@ Other good prompts:
 
 | Layer | Choice | Why |
 |-------|--------|-----|
-| LLM | DeepSeek (`deepseek-chat`) | Strong quality/cost for generation |
-| Embeddings | Local `BAAI/bge-small-en-v1.5` | Keeps handbook text on-machine |
-| Vector store | Chroma | Simple persistent local index |
-| Orchestration | LlamaIndex | Clean ingest/query path |
-| UI | Streamlit | Fast portfolio demo with source expanders |
+| Generation | DeepSeek (`deepseek-chat`) | Cost-efficient generation on retrieved snippets |
+| Embeddings | Local `BAAI/bge-small-en-v1.5` | Handbook text stays on-machine |
+| Vector store | Chroma | Persistent local index |
+| Orchestration | LlamaIndex | Ingest / retrieve / query path |
+| UI | Streamlit | Lightweight operator UI |
 
 ---
 
@@ -72,44 +69,43 @@ source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
 cp .env.example .env
-# edit .env and set DEEPSEEK_API_KEY=...
+# set DEEPSEEK_API_KEY=...
 
 python -m src.ingest               # build local vector index from data/
 python -m src.query --question "How do I request annual leave?"
-streamlit run app.py               # open the local URL Streamlit prints
-python -m src.eval                 # quality gate
+streamlit run app.py
+python -m src.eval                 # regression suite
 ```
 
 First ingest downloads the local embedding model (one-time).
 
 ---
 
-## Project layout
+## Layout
 
 ```text
 hr-agent/
-├── app.py                      # Streamlit UI
-├── data/                       # synthetic Acme HK policy + how-to pack
-├── docs/CASE_STUDY.md          # portfolio narrative
+├── app.py                 # Streamlit UI
+├── data/                  # Acme HK sample policy + how-to pack
+├── docs/PRODUCT.md        # product design
 ├── eval/
-│   ├── golden_questions.json   # regression cases
-│   └── last_report.json        # last local eval run (optional to commit)
+│   ├── golden_questions.json
+│   └── last_report.json
 ├── src/
 │   ├── config.py
 │   ├── ingest.py
 │   ├── query.py
 │   └── eval.py
 ├── .env.example
-├── LICENSE                     # MIT
-├── PUBLISH.md                  # push steps after GitHub account exists
+├── LICENSE                # MIT
 └── README.md
 ```
 
 ---
 
-## Demo corpus
+## Sample corpus
 
-Synthetic **Acme HK** handbook pack (portfolio-safe — **not** a real employer policy):
+Bundled **Acme HK** pack — sample content for local runs, **not** a real employer handbook:
 
 | File | Content |
 |------|---------|
@@ -122,6 +118,8 @@ Synthetic **Acme HK** handbook pack (portfolio-safe — **not** a real employer 
 | `07_how_to_submit_expense_claim.md` | Expense steps + receipt threshold |
 | `08_hr_contact_and_escalation.md` | Self-serve vs HR ticket |
 
+Replace `data/` with your own licensed policies for a real deployment.
+
 ---
 
 ## Evaluation
@@ -130,35 +128,36 @@ Synthetic **Acme HK** handbook pack (portfolio-safe — **not** a real employer 
 python -m src.eval
 ```
 
-| Metric | Meaning |
-|--------|---------|
-| Retrieval hit-rate | Expected source file appears in top sources |
+| Check | Meaning |
+|-------|---------|
+| Retrieval hit | Expected source file appears in top sources |
 | Keyword coverage | Answer contains domain anchor phrases |
 | Latency | End-to-end query time |
 
-Baseline on this pack: **7/7 pass** (local run). Report: `eval/last_report.json`.
+On the sample pack: **7/7** pass. Report: `eval/last_report.json`.
 
 ---
 
-## Enterprise controls (honest v1)
+## Operating controls
 
 - Local embeddings; only retrieved snippets + question go to the LLM
 - Citations always shown in the UI
 - No workflow execution; no invented personal leave balances
 - Escalation copy for exceptions, payroll, grievances
-- `.env` gitignored — **never commit API keys**
+- `.env` is gitignored — never commit API keys
 
-Production follow-ons (not in this demo): SSO, DLP/redaction, private LLM endpoint, deflection analytics.
+For a live tenant deploy, add SSO, DLP/redaction, private model endpoint, and deflection analytics as needed.
 
 ---
 
-## What this is / isn’t
+## Related
 
-| This repo | Not this repo |
-|-----------|----------------|
-| Employee policy + HR how-to RAG | Multi-vendor impl copilot |
-| GitHub portfolio proof | Production multi-tenant SaaS |
-| Synthetic handbook | Real customer PII / policies |
+| Product | Repo | Audience |
+|---------|------|----------|
+| **HR Agent** (this repo) | `hr-agent` | Employees — policy + how-to |
+| **HCM Implementation Copilot** | `hcm-impl-copilot` | Consultants — multi-vendor impl guidance |
+
+Codebases are separate on purpose.
 
 ---
 
@@ -166,4 +165,4 @@ Production follow-ons (not in this demo): SSO, DLP/redaction, private LLM endpoi
 
 MIT — see [LICENSE](LICENSE).
 
-Demo policy text is synthetic for illustration only and is not legal or HR advice.
+Sample policy text is for illustration only and is not legal or HR advice.

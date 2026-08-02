@@ -1,4 +1,4 @@
-"""Streamlit UI — HR Agent (portfolio product B)."""
+"""Streamlit UI — HR Agent."""
 
 from __future__ import annotations
 
@@ -20,28 +20,26 @@ st.title(PRODUCT_NAME)
 st.caption(PRODUCT_TAGLINE)
 st.write(
     "Ask **company policy** questions and **how to complete standard HR actions** "
-    "(leave, profile, expenses). Built to **deflect Tier-1 tickets** and relieve HR "
-    "of repetitive answers — with **citations** every time."
+    "(leave, profile, expenses). Every answer includes **citations** from the handbook pack."
 )
 
 with st.sidebar:
-    st.header("Portfolio product")
+    st.header("About")
     st.markdown(
         """
 **Users:** Employees  
-**Buyer:** CHRO / People Ops  
+**Operators:** People Ops / HRIS  
 
 **Job:** Policy Q&A + how-to for standard HR actions  
-→ lower ticket volume on repetitive questions  
 
-**Not this product:** multi-SaaS implementation copilot  
-(that ships separately as `hcm-impl-copilot`)
+**Not this product:** multi-vendor implementation guidance  
+(see `hcm-impl-copilot`)
 
 **Controls**
 - Citations always on
 - Local embeddings (BGE)
-- Cloud gen on retrieved snippets only (DeepSeek)
-- Assistant **informs** — does not submit workflows
+- Generation only on retrieved snippets (DeepSeek)
+- Informs only — does not submit workflows
 
 **Stack**
 - LLM: DeepSeek

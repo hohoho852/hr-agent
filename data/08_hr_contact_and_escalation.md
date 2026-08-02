@@ -1,4 +1,4 @@
-# When to Self-Serve vs Contact HR (Acme HK — Demo)
+# When to Self-Serve vs Contact HR (Acme HK)
 
 **Document type:** Operating guide for employees and People Ops  
 **Purpose:** Relieve HR of repetitive Tier-1 questions while protecting escalations that need humans
@@ -43,9 +43,9 @@ Use the assistant or FAQ when you need:
 - “What’s the hybrid default?” → hybrid policy  
 - “How do I change my phone number?” → personal info how-to  
 
-These are **deflection targets** for the Track B assistant.
+These are **deflection targets** for the employee assistant.
 
-## 5. Metrics People Ops cares about (portfolio signal)
+## 5. Metrics People Ops cares about
 
 | Metric | Intent |
 |--------|--------|
