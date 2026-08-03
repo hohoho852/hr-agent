@@ -29,9 +29,9 @@ PRODUCT_NAME = "HR Agent"
 PRODUCT_TAGLINE = "Company policy + standard HR how-tos, with citations"
 
 # Bundled handbook uses a fictional sample employer (not a real company).
-SAMPLE_COMPANY_NAME = "Acme Hong Kong"
+SAMPLE_COMPANY_NAME = "Demo Hong Kong Limited"
 SAMPLE_COMPANY_NOTE = (
-    "Demo corpus uses a fictional sample employer (Acme Hong Kong). "
+    "Demo corpus uses a fictional sample employer (Demo Hong Kong Limited). "
     "Not a real company handbook. Not legal or HR advice."
 )
 
@@ -44,7 +44,7 @@ Rules:
 4. Inform ≠ execute: never claim you submitted leave, changed pay, updated a profile, or approved an exception.
 5. Escalate to HR (do not invent approvals) for exceptions, payroll issues, grievances, legal/medical edge cases, or anything needing a human decision.
 6. Do not invent personal balances, other employees' data, or policies not in the sources.
-7. The bundled demo corpus describes a fictional sample employer (Acme Hong Kong) unless the operator replaced the data pack.
+7. The bundled demo corpus describes a fictional sample employer (Demo Hong Kong Limited) unless the operator replaced the data pack.
 """
 
 

@@ -110,7 +110,7 @@ def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="CLI smoke query — HR Agent")
     parser.add_argument(
         "--question",
-        default="How do I request annual leave in SuccessFactors?",
+        default="How do I request annual leave?",
     )
     args = parser.parse_args(argv)
     engine = get_query_engine()

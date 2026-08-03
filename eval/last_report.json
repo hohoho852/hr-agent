@@ -4,46 +4,46 @@
   "pass_rate": 1.0,
   "keyword_hit_rate": 1.0,
   "retrieval_hit_rate": 1.0,
-  "avg_latency_s": 2.201,
+  "avg_latency_s": 2.202,
   "results": [
     {
       "id": "b_al_entitlement",
       "question": "How many annual leave days do full-time employees get per leave year?",
-      "latency_s": 1.156,
+      "latency_s": 1.442,
       "keyword_hit": true,
       "retrieval_hit": true,
       "pass": true,
-      "answer_preview": "Full-time employees on Acme Hong Kong payroll get **15 working days** of annual leave per leave year after probation confirmation.",
+      "answer_preview": "Full-time employees on Demo Hong Kong Limited payroll get **15 working days** of annual leave per leave year after probation confirmation.",
       "top_files": [
         "02_leave_and_time_off_policy.md",
         "03_how_to_request_time_off.md",
         "03_how_to_request_time_off.md",
-        "08_hr_contact_and_escalation.md"
+        "01_employee_handbook_overview.md"
       ]
     },
     {
       "id": "b_request_time_off",
-      "question": "How do I request annual leave in SuccessFactors?",
-      "latency_s": 2.591,
+      "question": "How do I request annual leave?",
+      "latency_s": 3.253,
       "keyword_hit": true,
       "retrieval_hit": true,
       "pass": true,
-      "answer_preview": "To request annual leave in SuccessFactors:\n\n1. Sign in to **SAP SuccessFactors**.\n2. Open the **home** page and select **Time Off** (or search \u201cTime Off\u201d in global search).\n3. Choose **Request Time Off** (or **New Absence**).\n4. Select **Time Type** \u2192 **Annual Leave**.\n5. Enter *",
+      "answer_preview": "To request annual leave, follow these steps in the People Portal (company HR system):\n\n1. Sign in to the **People Portal**.\n2. Open the **home** page and select **Time Off** (or search \u201cTime Off\u201d in global search).\n3. Choose **Request Time Off** (or **New Absence**).\n4. Select **",
       "top_files": [
         "03_how_to_request_time_off.md",
-        "05_how_to_update_personal_info.md",
-        "08_hr_contact_and_escalation.md",
-        "02_leave_and_time_off_policy.md"
+        "03_how_to_request_time_off.md",
+        "02_leave_and_time_off_policy.md",
+        "08_hr_contact_and_escalation.md"
       ]
     },
     {
       "id": "b_sick_cert",
       "question": "When do I need a medical certificate for sick leave?",
-      "latency_s": 2.101,
+      "latency_s": 2.157,
       "keyword_hit": true,
       "retrieval_hit": true,
       "pass": true,
-      "answer_preview": "You need a medical certificate for sick leave in these cases:\n\n- **2 or more consecutive calendar days** of sick leave.\n- **Any day adjacent to a public holiday or annual leave**, if your manager requests it.\n\nFor sick leave of 2+ days, prepare a scan/photo of the medical certifi",
+      "answer_preview": "You need a medical certificate for sick leave in these cases:\n\n- **2 or more consecutive calendar days** of sick leave.\n- **Any day adjacent to a public holiday or annual leave**, if your manager requests it.\n\nFor 2+ consecutive sick days, attach the medical certificate scan/phot",
       "top_files": [
         "03_how_to_request_time_off.md",
         "03_how_to_request_time_off.md",
@@ -53,23 +53,23 @@
     },
     {
       "id": "b_update_address",
-      "question": "How do I update my home address in SuccessFactors?",
-      "latency_s": 2.041,
+      "question": "How do I update my home address?",
+      "latency_s": 2.285,
       "keyword_hit": true,
       "retrieval_hit": true,
       "pass": true,
-      "answer_preview": "To update your home address in SuccessFactors:\n\n1. Sign in to **SAP SuccessFactors**.\n2. Click your **name / photo** (top right) \u2192 **Show profile** / **Personal Information** (or search \u201cPersonal Information\u201d or open **Employee File**).\n3. Go to the **Addresses** section (home ad",
+      "answer_preview": "To update your home address:\n\n1. Sign in to the **People Portal** (company HR system).\n2. Click your **name / photo** (top right) \u2192 **Show profile** / **Personal Information** (or search \u201cPersonal Information\u201d / open **Employee File**).\n3. Go to the **Addresses** section (home ad",
       "top_files": [
         "05_how_to_update_personal_info.md",
-        "03_how_to_request_time_off.md",
         "07_how_to_submit_expense_claim.md",
-        "08_hr_contact_and_escalation.md"
+        "04_personal_data_and_profile_policy.md",
+        "03_how_to_request_time_off.md"
       ]
     },
     {
       "id": "b_hybrid_default",
       "question": "What is the default hybrid work pattern?",
-      "latency_s": 1.666,
+      "latency_s": 1.606,
       "keyword_hit": true,
       "retrieval_hit": true,
       "pass": true,
@@ -77,18 +77,18 @@
       "top_files": [
         "06_hybrid_work_and_attendance_policy.md",
         "08_hr_contact_and_escalation.md",
-        "01_employee_handbook_overview.md",
-        "04_personal_data_and_profile_policy.md"
+        "04_personal_data_and_profile_policy.md",
+        "01_employee_handbook_overview.md"
       ]
     },
     {
       "id": "b_expense_steps",
       "question": "How do I submit an expense claim and what receipt threshold applies?",
-      "latency_s": 3.483,
+      "latency_s": 2.353,
       "keyword_hit": true,
       "retrieval_hit": true,
       "pass": true,
-      "answer_preview": "To submit an expense claim in SuccessFactors, follow these steps:\n\n1. Sign in to **SuccessFactors**.\n2. Open **Expenses** (or **My Expenses**).\n3. Click **Create expense report** / **New claim**.\n4. Enter a **report name** (e.g., \u201cClient visit \u2013 12 Jul\u201d).\n5. **Add expense line** ",
+      "answer_preview": "To submit an expense claim, follow these steps in the **People Portal**:\n\n1. Sign in to the **People Portal** (company HR / finance tools).\n2. Open **Expenses** (or **My Expenses**).\n3. Click **Create expense report** / **New claim**.\n4. Enter a **report name** (e.g., \u201cClient vis",
       "top_files": [
         "07_how_to_submit_expense_claim.md",
         "08_hr_contact_and_escalation.md",
@@ -99,16 +99,16 @@
     {
       "id": "b_when_contact_hr",
       "question": "When should I contact HR instead of using self-serve?",
-      "latency_s": 2.372,
+      "latency_s": 2.317,
       "keyword_hit": true,
       "retrieval_hit": true,
       "pass": true,
-      "answer_preview": "You should contact HR (open a ticket) instead of self-serve for situations that need human judgment, discretion, or handling of sensitive data. According to the operating guide, these include:\n\n- **Exception to policy** (e.g., extra leave, unpaid leave, remote abroad >5 days)\n- *",
+      "answer_preview": "Based on the operating guide, you should contact HR (open a ticket) instead of self-serve for the following situations:\n\n- **Exception to policy** (e.g., extra leave, unpaid leave, remote abroad >5 days)\n- **Payroll discrepancy / wrong pay**\n- **Harassment, grievance, performance",
       "top_files": [
         "08_hr_contact_and_escalation.md",
         "04_personal_data_and_profile_policy.md",
         "03_how_to_request_time_off.md",
-        "03_how_to_request_time_off.md"
+        "05_how_to_update_personal_info.md"
       ]
     }
   ]

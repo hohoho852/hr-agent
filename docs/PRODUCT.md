@@ -56,7 +56,7 @@ python -m src.eval
 ```
 
 Metrics: retrieval hit-rate, keyword coverage, latency.  
-Baseline on the Acme HK sample pack: 7/7 pass.
+Baseline on the Demo Hong Kong Limited sample pack: 7/7 pass.
 
 ## 6. Controls
 

@@ -1,7 +1,7 @@
-# How to Request Time Off in SuccessFactors (Employee Guide)
+# How to Request Time Off (Employee Guide)
 
 **Audience:** Employees  
-**System path:** SuccessFactors → Time Off  
+**System path:** People Portal / company HR system → Time Off  
 **Policy source:** `02_leave_and_time_off_policy.md`
 
 ---
@@ -17,10 +17,10 @@ Submit annual leave, sick leave, or other absence so your manager can approve it
 3. For sick leave ≥2 consecutive days, prepare a **medical certificate** scan/photo.  
 4. Do not share full medical details in the comment field — “medical cert attached” is enough.
 
-## Steps — desktop (Employee Central / Time Off)
+## Steps — desktop (Time Off)
 
-1. Sign in to **SAP SuccessFactors**.  
-2. Open the **home** page and select **Time Off** (or search “Time Off” in the global search).  
+1. Sign in to the **People Portal** (company HR system).  
+2. Open the **home** page and select **Time Off** (or search “Time Off” in global search).  
 3. Choose **Request Time Off** (or **New Absence**).  
 4. Select **Time Type** (e.g. Annual Leave, Sick Leave).  
 5. Enter **start date** and **end date**.  
@@ -31,9 +31,9 @@ Submit annual leave, sick leave, or other absence so your manager can approve it
 9. Click **Submit**.  
 10. Status becomes **Pending** until your manager acts.
 
-## Steps — mobile (SuccessFactors mobile app)
+## Steps — mobile (HR mobile app)
 
-1. Open the app and sign in.  
+1. Open the company HR mobile app and sign in.  
 2. Tap **Time Off** / **Absences**.  
 3. Tap **+** or **Request**.  
 4. Select type, dates, half-day if needed.  

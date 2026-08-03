@@ -1,7 +1,7 @@
 # How to Submit an Expense Claim (Employee Guide)
 
 **Audience:** Employees  
-**System:** SuccessFactors / connected Expense module (demo assumes **Expenses** tile)  
+**System:** Company HR / finance portal (demo assumes **Expenses** tile)  
 **Policy anchors:** Receipts required; manager approval; finance audit
 
 ---
@@ -23,7 +23,7 @@ Claim legitimate business expenses so you are reimbursed on the next eligible pa
 
 ## Steps
 
-1. Sign in to **SuccessFactors**.  
+1. Sign in to the **People Portal** (company HR / finance tools).  
 2. Open **Expenses** (or **My Expenses**).  
 3. Click **Create expense report** / **New claim**.  
 4. Enter **report name** (e.g. “Client visit – 12 Jul”).  

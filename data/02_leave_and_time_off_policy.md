@@ -1,8 +1,8 @@
-# Leave and Time Off Policy (Acme HK)
+# Leave and Time Off Policy (Demo HK)
 
 **Document type:** Company policy  
-**Applies to:** Full-time employees on Acme Hong Kong payroll  
-**System:** SuccessFactors Time Off  
+**Applies to:** Full-time employees on Demo Hong Kong Limited payroll  
+**System:** Company HR system — Time Off  
 **Related how-to:** `03_how_to_request_time_off.md`
 
 ---
@@ -44,11 +44,11 @@ Do **not** use annual leave to hide illness if you are unwell and eligible for s
 
 ## 4. Public holidays
 
-Acme observes the Hong Kong general holiday calendar published each year on the People Portal. Working on a public holiday requires pre-approval and TOIL or pay per contract.
+Demo Hong Kong Limited observes the Hong Kong general holiday calendar published each year on the People Portal. Working on a public holiday requires pre-approval and TOIL or pay per contract.
 
 ## 5. Approval rules
 
-1. Employee submits in **SuccessFactors Time Off**.  
+1. Employee submits in **Time Off** in the company HR system.  
 2. **Line manager** approves or declines.  
 3. HR may override only for policy/compliance exceptions.  
 4. Taking leave **without an approved request** may be treated as unauthorised absence.

@@ -1,7 +1,7 @@
-# How to Update Personal Information in SuccessFactors (Employee Guide)
+# How to Update Personal Information (Employee Guide)
 
 **Audience:** Employees  
-**System path:** SuccessFactors → Personal Information / People Profile  
+**System path:** People Portal / company HR system → Personal Information / Employee Profile  
 **Policy source:** `04_personal_data_and_profile_policy.md`
 
 ---
@@ -12,7 +12,7 @@ Correct your address, phone, emergency contact, or other allowed personal fields
 
 ## Steps — update address or phone
 
-1. Sign in to **SAP SuccessFactors**.  
+1. Sign in to the **People Portal** (company HR system).  
 2. Click your **name / photo** (top right) → **Show profile** / **Personal Information**.  
    - Alternate: search **“Personal Information”** or open **Employee File**.  
 3. Find the section:

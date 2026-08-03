@@ -25,7 +25,7 @@ All cases in `eval/golden_questions.json` should pass before opening a PR.
 ## Rules
 
 - Do **not** commit `.env`, API keys, or real employer handbooks without rights  
-- Keep the default corpus as the sample Acme HK pack unless you own the content  
+- Keep the default corpus as the sample Demo Hong Kong Limited pack unless you own the content  
 - Keep `source/` (client-style PDFs) aligned with `data/` when you change sample policy  
 - Assistant must **inform**, not execute HR workflows  
 - This repo is **employee self-serve only** — keep docs and UI on that product boundary  

@@ -1,4 +1,4 @@
-# When to Self-Serve vs Contact HR (Acme HK)
+# When to Self-Serve vs Contact HR (Demo HK)
 
 **Document type:** Operating guide for employees and People Ops  
 **Purpose:** Relieve HR of repetitive Tier-1 questions while protecting escalations that need humans
@@ -10,11 +10,11 @@
 Use the assistant or FAQ when you need:
 
 - Standard **policy explanations** (leave entitlement rules, hybrid pattern, expense thresholds)  
-- **How-to steps** in SuccessFactors (request leave, update address, submit expenses)  
+- **How-to steps** in the company HR system (request leave, update address, submit expenses)  
 - Links to the right form or module name  
 - “What documents do I need?” for standard cases  
 
-**Success look like:** employee completes the transaction or understands the rule without an HR ticket.
+**Success looks like:** employee completes the transaction or understands the rule without an HR ticket.
 
 ## 2. Contact HR / HRBP (open a ticket)
 
@@ -60,4 +60,4 @@ These are **deflection targets** for the employee assistant.
 2. If the user needs an **exception, pay fix, or sensitive case**, tell them to **open HR ticket** and stop inventing approvals.  
 3. Never pretend to have submitted a workflow.  
 4. Never reveal other employees’ data.  
-5. Prefer short step lists employees can follow in SF.
+5. Prefer short step lists employees can follow in the HR system.

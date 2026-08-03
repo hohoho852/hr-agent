@@ -25,7 +25,7 @@ from src.query import get_query_engine, index_needs_build
 
 EXAMPLE_QUESTIONS = [
     "How many annual leave days do I get?",
-    "How do I request time off in SuccessFactors?",
+    "How do I request time off?",
     "How do I update my home address?",
     "What is the default hybrid work pattern?",
     "How do I submit an expense claim?",
@@ -375,7 +375,7 @@ with st.form(key=f"ask_form_{st.session_state.input_key}", clear_on_submit=True)
     query = st.text_input(
         "Question",
         value=st.session_state.prefill,
-        placeholder="e.g. How do I request annual leave in SuccessFactors?",
+        placeholder="e.g. How do I request annual leave?",
         label_visibility="collapsed",
     )
     cols = st.columns([1, 4])

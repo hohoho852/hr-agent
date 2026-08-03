@@ -1,4 +1,4 @@
-# Hybrid Work and Attendance Policy (Acme HK)
+# Hybrid Work and Attendance Policy (Demo HK)
 
 **Document type:** Company policy  
 **Applies to:** Office-based and hybrid employees (Hong Kong)

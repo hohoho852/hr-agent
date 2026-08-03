@@ -7,7 +7,7 @@
   },
   {
     "id": "b_request_time_off",
-    "question": "How do I request annual leave in SuccessFactors?",
+    "question": "How do I request annual leave?",
     "must_include_any": ["Time Off", "Request Time Off", "Submit", "manager"],
     "expected_file_substr": "03_how_to_request_time_off"
   },
@@ -19,7 +19,7 @@
   },
   {
     "id": "b_update_address",
-    "question": "How do I update my home address in SuccessFactors?",
+    "question": "How do I update my home address?",
     "must_include_any": ["Personal Information", "Addresses", "Effective", "Save"],
     "expected_file_substr": "05_how_to_update_personal_info"
   },

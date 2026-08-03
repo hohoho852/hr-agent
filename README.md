@@ -27,7 +27,7 @@ Design notes: [`docs/PRODUCT.md`](docs/PRODUCT.md)
 ## Example
 
 ```text
-You:  How do I request annual leave in SuccessFactors?
+You:  How do I request annual leave?
 Bot:  Open Time Off → Request Time Off → choose Annual Leave → dates → Submit…
       + source citations from the leave how-to and policy pack
 ```
@@ -51,15 +51,15 @@ This repo includes a **sample client pack** under [`source/`](source/):
 
 | File | Role |
 |------|------|
-| `Acme_HK_Employee_Handbook_Overview.pdf` | Handbook overview / channels |
-| `Acme_HK_Leave_and_Time_Off_Policy.pdf` | Leave entitlements & rules |
-| `Acme_HK_Time_Off_Employee_Guide.pdf` | SuccessFactors Time Off steps |
-| `Acme_HK_Personal_Data_and_Profile_Policy.pdf` | What employees may change |
-| `Acme_HK_Hybrid_Work_Policy.pdf` | Hybrid / attendance default |
-| `Acme_HK_Expense_Claim_Guide.pdf` | Expense claim steps |
-| `Acme_HK_HR_Contact_and_Escalation.pdf` | Self-serve vs HR ticket |
+| `Demo_HK_Employee_Handbook_Overview.pdf` | Handbook overview / channels |
+| `Demo_HK_Leave_and_Time_Off_Policy.pdf` | Leave entitlements & rules |
+| `Demo_HK_Time_Off_Employee_Guide.pdf` | Time Off request steps (generic HR system) |
+| `Demo_HK_Personal_Data_and_Profile_Policy.pdf` | What employees may change |
+| `Demo_HK_Hybrid_Work_Policy.pdf` | Hybrid / attendance default |
+| `Demo_HK_Expense_Claim_Guide.pdf` | Expense claim steps |
+| `Demo_HK_HR_Contact_and_Escalation.pdf` | Self-serve vs HR ticket |
 
-**Acme Hong Kong is fictional** — sample content for demo only, not a real employer and not legal/HR advice.
+**Demo Hong Kong Limited is fictional** — sample content for demo only, not a real employer and not legal/HR advice. How-tos use a generic company HR system / People Portal (not a named vendor).
 
 Runtime indexing uses the machine-readable pack in [`data/`](data/) (same policies as markdown for reliable local builds). For a production tenant, replace both with **your licensed** PDFs/DOCX/MD and run ingest.
 
@@ -151,7 +151,7 @@ Indexed content for local/demo runs (mirrors the PDF pack in `source/`):
 |------|---------|
 | `01_employee_handbook_overview.md` | Purpose, channels, principles |
 | `02_leave_and_time_off_policy.md` | AL/SL rules, carry-over, notice |
-| `03_how_to_request_time_off.md` | SuccessFactors Time Off steps |
+| `03_how_to_request_time_off.md` | Time Off request steps (generic HR system) |
 | `04_personal_data_and_profile_policy.md` | What employees may change |
 | `05_how_to_update_personal_info.md` | Address / emergency / bank steps |
 | `06_hybrid_work_and_attendance_policy.md` | 3/2 hybrid default |

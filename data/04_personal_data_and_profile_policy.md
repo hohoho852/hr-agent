@@ -1,7 +1,7 @@
-# Personal Data and Employee Profile Policy (Acme HK)
+# Personal Data and Employee Profile Policy (Demo HK)
 
 **Document type:** Company policy + privacy summary  
-**System:** SuccessFactors Employee Central — Employee Profile / People Profile  
+**System:** Company HR system — Employee Profile / Personal Information  
 **Related how-to:** `05_how_to_update_personal_info.md`
 
 ---
@@ -43,7 +43,7 @@ Employees must keep personal data accurate so payroll, tax, benefits, and emerge
 
 ## 5. Effective dating
 
-Most biographic changes in Employee Central are **effective-dated**. Choose the date the change becomes true (e.g. move-in date). Back-dating beyond policy limits may require HR.
+Most biographic changes in the employee profile are **effective-dated**. Choose the date the change becomes true (e.g. move-in date). Back-dating beyond policy limits may require HR.
 
 ## 6. Verification
 

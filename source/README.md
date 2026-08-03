@@ -12,7 +12,7 @@ This folder holds **client-style inputs**: the kind of PDF/Word handbooks and ho
 | Expense claim guide | Finance + People Ops |
 | HR contact & escalation | People Ops / HRBP |
 
-**Demo note:** files are labeled **Acme Hong Kong** — a **fictional** sample employer. Not a real company. Not legal or HR advice.
+**Demo note:** files are labeled **Demo Hong Kong Limited** — a **fictional** sample employer. Not a real company. Not legal or HR advice. How-tos refer to a generic company HR system / People Portal (not a named vendor product).
 
 ## How this relates to `data/`
 
