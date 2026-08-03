@@ -36,7 +36,7 @@ Client docs (PDF/DOCX)  →  source/ (sample pack for audience)
                             data/  (runtime corpus; md or extracted text)
   → chunk 800 / overlap 120
   → local BGE → Chroma
-  → top_k=4 → DeepSeek answer + citations
+  → top_k=4 → customer LLM (OpenAI-compatible) + citations
   → Streamlit UI
   → eval suite (golden questions)
 ```
@@ -45,9 +45,12 @@ Client docs (PDF/DOCX)  →  source/ (sample pack for audience)
 |--------|-----|
 | RAG first | Policies change; answers must stay source-linked |
 | Local embeddings | Keep full handbook text on-machine |
+| Open model choice | Customer brings `LLM_API_KEY` + model (+ optional API base) |
 | Inform ≠ execute | Clear authZ / liability boundary |
 | Sample corpus in repo | Safe default; swap in licensed policies for production |
 | `source/` PDFs | Show what client input looks like before indexing |
+
+Company deploy options (IT choice, same product): see [`docs/DEPLOY-A-vs-B.md`](DEPLOY-A-vs-B.md).
 
 ## 5. Evaluation
 
@@ -65,4 +68,4 @@ Baseline on the Demo Hong Kong Limited sample pack: 7/7 pass.
 - Escalate exceptions, pay, and grievances  
 - Secrets only via `.env` / platform secrets (never committed)
 
-Production add-ons when you wire a real tenant: SSO, DLP, private LLM endpoint, deflection analytics.
+Production add-ons when you wire a real tenant: SSO, DLP, customer-owned LLM endpoint/key, deflection analytics, Path A/B private hosting.

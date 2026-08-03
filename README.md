@@ -69,17 +69,19 @@ Runtime indexing uses the machine-readable pack in [`data/`](data/) (same polici
 
 | Layer | Choice | Why |
 |-------|--------|-----|
-| Generation | DeepSeek (`deepseek-chat`) | Cost-efficient generation on retrieved snippets |
+| Generation | **Your** OpenAI-compatible chat model | Customer brings model + key (OpenAI, Azure OpenAI, DeepSeek, gateway, vLLM, …) |
 | Embeddings | Local `BAAI/bge-small-en-v1.5` | Handbook text stays on-machine |
 | Vector store | Chroma | Persistent local index |
 | Orchestration | LlamaIndex | Ingest / retrieve / query path |
 | UI | Streamlit | Lightweight employee / demo UI |
 
+Company deploy (private + SSO): IT picks **Path A** (cloud-neutral) or **Path B** (Azure/M365) — same product. See [`docs/DEPLOY-A-vs-B.md`](docs/DEPLOY-A-vs-B.md).
+
 ---
 
 ## Quickstart
 
-**Requirements:** Python 3.10+, a [DeepSeek API key](https://platform.deepseek.com/)
+**Requirements:** Python 3.10+, an API key for **any OpenAI-compatible** chat endpoint
 
 ```bash
 git clone https://github.com/hohoho852/hr-agent.git
@@ -90,7 +92,7 @@ source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
 cp .env.example .env
-# set DEEPSEEK_API_KEY=...
+# set LLM_API_KEY=...   optional: LLM_MODEL, LLM_API_BASE
 
 python -m src.ingest               # build local vector index from data/
 python -m src.query --question "How do I request annual leave?"
@@ -99,6 +101,16 @@ python -m src.eval                 # regression suite
 ```
 
 First ingest downloads the local embedding model (one-time).
+
+### Model configuration
+
+| Variable | Required | Purpose |
+|----------|----------|--------|
+| `LLM_API_KEY` | yes* | Customer key (`OPENAI_API_KEY` alias OK) |
+| `LLM_MODEL` | no | Model / deployment name |
+| `LLM_API_BASE` | no | OpenAI-compatible base URL |
+
+\*Legacy `DEEPSEEK_API_KEY` alone still works for existing demos (implies DeepSeek base + `deepseek-chat`).
 
 ---
 
@@ -111,8 +123,12 @@ No Docker required. Point Streamlit at this repo with **Main file:** `app.py`.
 **Secrets (TOML):**
 
 ```toml
-DEEPSEEK_API_KEY = "your_deepseek_key_here"
+LLM_API_KEY = "your_key_here"
+LLM_MODEL = "deepseek-chat"
+LLM_API_BASE = "https://api.deepseek.com/v1"
 ```
+
+Or any other OpenAI-compatible provider — set `LLM_MODEL` / `LLM_API_BASE` to match. Legacy `DEEPSEEK_API_KEY` alone is still accepted.
 
 **First boot:** the app downloads the local BGE embedding model and builds the Chroma index from `data/` automatically (several minutes on a cold container). The vector store is not committed — each new container rebuilds on first start.
 
@@ -189,7 +205,7 @@ On the sample pack: **7/7** pass. Report: `eval/last_report.json`.
 - Public demo: session limits count **attempted model calls** (default 10/session, 5s cooldown)
 - `.env` is gitignored — never commit API keys
 
-For a live tenant deploy, add SSO, DLP/redaction, private model endpoint, and deflection analytics as needed.
+For a live tenant deploy, add SSO, DLP/redaction, customer-owned model endpoint/key, and deflection analytics as needed. IT deploy choice: [`docs/DEPLOY-A-vs-B.md`](docs/DEPLOY-A-vs-B.md).
 
 ---
 

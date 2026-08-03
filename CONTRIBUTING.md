@@ -9,7 +9,7 @@ python3 -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 cp .env.example .env
-# set DEEPSEEK_API_KEY
+# set LLM_API_KEY (+ optional LLM_MODEL, LLM_API_BASE)
 python -m src.ingest
 streamlit run app.py
 ```

@@ -14,7 +14,7 @@ git push origin main
 ## Repo settings
 
 - Description: `Employee policy + HR how-to assistant with citations`
-- Topics: `rag`, `hr`, `streamlit`, `llamaindex`, `deepseek`
+- Topics: `rag`, `hr`, `streamlit`, `llamaindex`, `openai-compatible`
 - About → points at README
 
 ## Never push

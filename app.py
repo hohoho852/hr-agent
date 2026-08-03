@@ -180,7 +180,8 @@ try:
 except Exception as exc:  # noqa: BLE001
     st.error(f"Could not start the assistant: {exc}")
     st.info(
-        "Set `DEEPSEEK_API_KEY` in `.env` (local) or Streamlit Secrets (cloud). "
+        "Set `LLM_API_KEY` (or `OPENAI_API_KEY`) in `.env` / Streamlit Secrets. "
+        "Optional: `LLM_MODEL`, `LLM_API_BASE` for your provider. "
         "Ensure policy documents exist under `data/`."
     )
     st.stop()
@@ -193,7 +194,7 @@ def _limits_block() -> str | None:
     if limit and st.session_state.ask_count >= limit:
         return (
             f"Demo session limit reached ({limit} questions). "
-            "Clone the repo and run locally with your own `DEEPSEEK_API_KEY` for unlimited use."
+            "Clone the repo and run locally with your own `LLM_API_KEY` for unlimited use."
         )
     cooldown = demo_cooldown_sec()
     elapsed = time.time() - float(st.session_state.last_ask_ts or 0.0)

@@ -1,6 +1,7 @@
 """Runtime config — HR Agent.
 
 Employee self-serve only - company policy and standard HR how-tos.
+Generation model is customer-configurable (OpenAI-compatible API).
 """
 
 from __future__ import annotations
@@ -11,7 +12,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from llama_index.core import Settings
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-from llama_index.llms.deepseek import DeepSeek
+from llama_index.llms.openai import OpenAI
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = PROJECT_ROOT / "data"
@@ -23,7 +24,10 @@ CHUNK_OVERLAP = 120
 SIMILARITY_TOP_K = 4
 
 EMBED_MODEL_NAME = "BAAI/bge-small-en-v1.5"
-LLM_MODEL_NAME = "deepseek-chat"
+
+# Defaults favor a cheap OpenAI-compatible endpoint; override via env/secrets.
+DEFAULT_LLM_MODEL = "deepseek-chat"
+DEFAULT_LLM_API_BASE = "https://api.deepseek.com/v1"
 
 PRODUCT_NAME = "HR Agent"
 PRODUCT_TAGLINE = "Company policy + standard HR how-tos, with citations"
@@ -76,38 +80,93 @@ def project_root() -> Path:
     return PROJECT_ROOT
 
 
-def _api_key_from_streamlit() -> str | None:
+def _load_env() -> None:
+    load_dotenv(PROJECT_ROOT / ".env")
+
+
+def _secret_get(*names: str) -> str | None:
+    """Read the first non-empty value from env, then Streamlit secrets."""
+    _load_env()
+    for name in names:
+        val = (os.environ.get(name) or "").strip()
+        if val and not val.lower().startswith("your_"):
+            return val
+
     try:
         import streamlit as st
     except ImportError:
         return None
+
     try:
         secrets = st.secrets
-        if "DEEPSEEK_API_KEY" in secrets:
-            return str(secrets["DEEPSEEK_API_KEY"]).strip()
-        if hasattr(secrets, "get"):
-            val = secrets.get("DEEPSEEK_API_KEY")
-            if val:
-                return str(val).strip()
     except Exception:
         return None
+
+    for name in names:
+        try:
+            if name in secrets:
+                val = str(secrets[name]).strip()
+                if val and not val.lower().startswith("your_"):
+                    return val
+            if hasattr(secrets, "get"):
+                raw = secrets.get(name)
+                if raw:
+                    val = str(raw).strip()
+                    if val and not val.lower().startswith("your_"):
+                        return val
+        except Exception:
+            continue
     return None
 
 
+def llm_model_name() -> str:
+    return _secret_get("LLM_MODEL", "OPENAI_MODEL") or DEFAULT_LLM_MODEL
+
+
+def llm_api_base() -> str | None:
+    """Optional OpenAI-compatible base URL (Azure, DeepSeek, vLLM, gateway, etc.)."""
+    return _secret_get("LLM_API_BASE", "OPENAI_API_BASE", "OPENAI_BASE_URL")
+
+
 def require_api_key() -> str:
-    load_dotenv(PROJECT_ROOT / ".env")
-    api_key = (os.environ.get("DEEPSEEK_API_KEY") or "").strip()
-    if not api_key or api_key.lower().startswith("your_"):
-        api_key = (_api_key_from_streamlit() or "").strip()
-    if not api_key or api_key.lower().startswith("your_"):
+    """Customer-supplied generation key (provider-agnostic)."""
+    api_key = _secret_get(
+        "LLM_API_KEY",
+        "OPENAI_API_KEY",
+        # Legacy demo name — still accepted so existing Streamlit secrets keep working.
+        "DEEPSEEK_API_KEY",
+    )
+    if not api_key:
         raise RuntimeError(
-            "DEEPSEEK_API_KEY missing. For local runs, copy .env.example to .env and set your key. "
-            "On Streamlit Community Cloud, add DEEPSEEK_API_KEY to app Secrets (TOML)."
+            "LLM API key missing. Set LLM_API_KEY (preferred) or OPENAI_API_KEY "
+            "in `.env` (local) or Streamlit Secrets (cloud). "
+            "Optional: LLM_MODEL, LLM_API_BASE for non-OpenAI endpoints. "
+            "Legacy DEEPSEEK_API_KEY is still accepted."
         )
     return api_key
 
 
 def configure_settings() -> None:
+    """Wire embeddings + customer-chosen chat model (OpenAI-compatible client)."""
     api_key = require_api_key()
-    Settings.llm = DeepSeek(model=LLM_MODEL_NAME, api_key=api_key, temperature=0)
+    model = llm_model_name()
+    api_base = llm_api_base()
+
+    # If only a legacy DeepSeek key is present and base was not set, keep demo default base.
+    if api_base is None and _secret_get("DEEPSEEK_API_KEY") and not _secret_get(
+        "LLM_API_KEY", "OPENAI_API_KEY"
+    ):
+        api_base = DEFAULT_LLM_API_BASE
+        if model == DEFAULT_LLM_MODEL or not _secret_get("LLM_MODEL", "OPENAI_MODEL"):
+            model = DEFAULT_LLM_MODEL
+
+    llm_kwargs: dict = {
+        "model": model,
+        "api_key": api_key,
+        "temperature": 0,
+    }
+    if api_base:
+        llm_kwargs["api_base"] = api_base
+
+    Settings.llm = OpenAI(**llm_kwargs)
     Settings.embed_model = HuggingFaceEmbedding(model_name=EMBED_MODEL_NAME)
