@@ -113,35 +113,29 @@ st.markdown(
         background: #f3f3f3;
         color: #111;
     }
-    /* Assistant: default left alignment */
-    [data-testid="stChatMessage"] {
-        max-width: 100%;
+    /* Chat bubbles via column layout (reliable vs fragile :has() avatar CSS) */
+    .hr-bubble {
+        border-radius: 1.15rem;
+        padding: 0.7rem 1rem;
+        line-height: 1.5;
+        word-wrap: break-word;
     }
-    /* User: bubble on the right (ChatGPT pattern) */
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
-        flex-direction: row-reverse;
-    }
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"])
-    [data-testid="stChatMessageContent"] {
+    .hr-bubble p { margin-bottom: 0.4rem; }
+    .hr-bubble p:last-child { margin-bottom: 0; }
+    .hr-bubble-user {
         background: #2563eb;
         color: #ffffff;
-        border-radius: 1.25rem;
-        padding: 0.65rem 1rem;
-        max-width: min(75%, 42rem);
-        margin-left: auto;
     }
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"])
-    [data-testid="stChatMessageContent"] p {
-        color: #ffffff;
+    .hr-bubble-user p, .hr-bubble-user li, .hr-bubble-user span {
+        color: #ffffff !important;
     }
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"])
-    [data-testid="stChatMessageContent"] {
-        background: #ffffff;
+    .hr-bubble-assistant {
+        background: #f3f4f6;
         border: 1px solid #e5e7eb;
-        border-radius: 1.25rem;
-        padding: 0.65rem 1rem;
-        color: #1a1a1a;
-        max-width: min(85%, 46rem);
+        color: #111827;
+    }
+    .hr-msg-row {
+        margin: 0.35rem 0 0.85rem;
     }
     [data-testid="stChatInput"] textarea {
         border: 1px solid #e5e7eb !important;
@@ -408,6 +402,46 @@ def _render_sources(sources: list[dict]) -> None:
                 st.divider()
 
 
+def _md_to_html(content: str) -> str:
+    """Lightweight markdown → HTML for bubble bodies (bold/italic/code/breaks)."""
+    import html
+    import re
+
+    text = content or ""
+    # Escape first, then re-apply a few markdown patterns.
+    text = html.escape(text)
+    text = re.sub(r"`([^`]+)`", r"<code>\1</code>", text)
+    text = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", text)
+    text = re.sub(r"(?<!\*)\*([^*]+)\*(?!\*)", r"<em>\1</em>", text)
+    # Numbered / bullet lines stay readable with <br>
+    text = text.replace("\n", "<br>")
+    return text
+
+
+def _render_user_bubble(content: str) -> None:
+    """User message aligned right (ChatGPT / Grok pattern)."""
+    body = _md_to_html(content)
+    left, right = st.columns([1, 2], gap="small")
+    with right:
+        st.markdown(
+            f'''<div class="hr-msg-row"><div class="hr-bubble hr-bubble-user">{body}</div></div>''',
+            unsafe_allow_html=True,
+        )
+
+
+def _render_assistant_bubble(content: str, sources: list | None = None) -> None:
+    """Assistant message aligned left with optional sources."""
+    body = _md_to_html(content)
+    left, right = st.columns([2, 1], gap="small")
+    with left:
+        st.markdown(
+            f'''<div class="hr-msg-row"><div class="hr-bubble hr-bubble-assistant">{body}</div></div>''',
+            unsafe_allow_html=True,
+        )
+        if sources is not None:
+            _render_sources(sources)
+
+
 def _send_user_message(question: str) -> None:
     """Append user turn, render optimistically, then assistant reply in one run."""
     q = (question or "").strip()
@@ -420,8 +454,7 @@ def _send_user_message(question: str) -> None:
     conv["messages"].append({"role": "user", "content": q})
     conv["updated_at"] = time.time()
 
-    with st.chat_message("user"):
-        st.markdown(q)
+    _render_user_bubble(q)
 
     block = _limits_block()
     if block:
@@ -433,30 +466,26 @@ def _send_user_message(question: str) -> None:
                 "system_note": True,
             }
         )
-        with st.chat_message("assistant"):
-            st.markdown(block)
+        _render_assistant_bubble(block, sources=[])
         return
 
     answer = ""
     sources: list[dict] = []
     system_note = False
 
-    with st.chat_message("assistant"):
-        with st.spinner("Finding sources and drafting an answer…"):
-            try:
-                prior = conv["messages"][:-1]
-                response = chat_query(engine, q, prior)
-                answer = response.response or ""
-                snippet_q = condensed_question_from_response(response) or q
-                sources = _source_payload(response, question=snippet_q, answer=answer)
-            except Exception as exc:  # noqa: BLE001
-                answer = f"Sorry, I could not answer that: {exc}"
-                sources = []
-                system_note = True
+    with st.spinner("Finding sources and drafting an answer…"):
+        try:
+            prior = conv["messages"][:-1]
+            response = chat_query(engine, q, prior)
+            answer = response.response or ""
+            snippet_q = condensed_question_from_response(response) or q
+            sources = _source_payload(response, question=snippet_q, answer=answer)
+        except Exception as exc:  # noqa: BLE001
+            answer = f"Sorry, I could not answer that: {exc}"
+            sources = []
+            system_note = True
 
-        st.markdown(answer)
-        if sources:
-            _render_sources(sources)
+    _render_assistant_bubble(answer, sources=sources if sources else [])
 
     conv["messages"].append(
         {
@@ -496,10 +525,11 @@ prompt = st.chat_input("Ask anything about leave, hybrid work, expenses…")
 incoming = chip_question or prompt
 
 for turn in messages:
-    with st.chat_message(turn["role"]):
-        st.markdown(turn["content"])
-        if turn["role"] == "assistant" and "sources" in turn:
-            _render_sources(turn.get("sources") or [])
+    if turn["role"] == "user":
+        _render_user_bubble(turn["content"])
+    else:
+        src = turn.get("sources") if "sources" in turn else None
+        _render_assistant_bubble(turn["content"], sources=src)
 
 if not messages and incoming is None:
     _render_empty_state()
