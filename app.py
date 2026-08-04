@@ -1,4 +1,4 @@
-"""Streamlit UI — HR Agent (executive-facing demo)."""
+"""Streamlit UI — HR Agent (employee self-serve chat demo)."""
 
 from __future__ import annotations
 
@@ -21,7 +21,12 @@ from src.config import (
     demo_limits_enabled,
     demo_session_limit,
 )
-from src.query import get_query_engine, index_needs_build
+from src.query import (
+    chat_query,
+    condensed_question_from_response,
+    get_chat_engine,
+    index_needs_build,
+)
 
 EXAMPLE_QUESTIONS = [
     "How many annual leave days do I get?",
@@ -32,7 +37,14 @@ EXAMPLE_QUESTIONS = [
     "When should I contact HR instead of self-serve?",
 ]
 
-# Executive-clean chrome: wide layout, restrained palette via custom CSS.
+WELCOME_MESSAGE = (
+    "I answer questions about **company policy** and **standard HR how-tos** "
+    "using your handbook pack, with sources on every reply.\n\n"
+    "**Hard boundary:** I inform only — I do **not** submit leave, change pay, "
+    "update your profile, or approve exceptions. For those, use your HR system or "
+    "open an HR ticket."
+)
+
 st.set_page_config(
     page_title=PRODUCT_NAME,
     page_icon="📋",
@@ -43,11 +55,10 @@ st.set_page_config(
 st.markdown(
     """
 <style>
-    /* Main canvas — calm, executive */
     .block-container {
-        padding-top: 1.4rem;
-        padding-bottom: 2.5rem;
-        max-width: 920px;
+        padding-top: 1.25rem;
+        padding-bottom: 1rem;
+        max-width: 820px;
     }
     h1 {
         font-weight: 650 !important;
@@ -58,13 +69,6 @@ st.markdown(
         color: #5b6570 !important;
         font-size: 0.98rem !important;
     }
-    /* Soft card for the answer stream */
-    div[data-testid="stVerticalBlockBorderWrapper"] {
-        border: 1px solid #e6e9ef;
-        border-radius: 12px;
-        background: #fbfcfe;
-    }
-    /* Sidebar as product brief, not a second app */
     section[data-testid="stSidebar"] {
         background: #f4f6f9;
         border-right: 1px solid #e4e8ef;
@@ -91,15 +95,8 @@ st.markdown(
         font-size: 0.9rem;
         line-height: 1.45;
     }
-    .hr-answer {
-        font-size: 1.05rem;
-        line-height: 1.55;
-        color: #111827;
-    }
-    .hr-q {
-        color: #374151;
-        font-weight: 600;
-        margin-bottom: 0.25rem;
+    [data-testid="stChatMessage"] {
+        max-width: 100%;
     }
 </style>
 """,
@@ -113,14 +110,10 @@ if "ask_count" not in st.session_state:
     st.session_state.ask_count = 0
 if "last_ask_ts" not in st.session_state:
     st.session_state.last_ask_ts = 0.0
-if "prefill" not in st.session_state:
-    st.session_state.prefill = ""
-if "auto_ask" not in st.session_state:
-    st.session_state.auto_ask = False
-if "input_key" not in st.session_state:
-    st.session_state.input_key = 0
+if "pending_question" not in st.session_state:
+    st.session_state.pending_question = None
 
-# ---------- Sidebar: product context for evaluators ----------
+# ---------- Sidebar ----------
 with st.sidebar:
     st.markdown(f"### {PRODUCT_NAME}")
     st.caption(PRODUCT_TAGLINE)
@@ -153,10 +146,13 @@ Client-style PDFs live in the repo `source/` folder (what an HR team would typic
     st.markdown("**Try a question**")
     for i, q in enumerate(EXAMPLE_QUESTIONS):
         if st.button(q, key=f"ex_{i}", use_container_width=True):
-            st.session_state.prefill = q
-            st.session_state.auto_ask = True
-            st.session_state.input_key += 1
+            st.session_state.pending_question = q
             st.rerun()
+    if st.button("New conversation", use_container_width=True):
+        # Clear transcript only; keep ask_count so demo session limits still apply.
+        st.session_state.history = []
+        st.session_state.pending_question = None
+        st.rerun()
     st.caption(
         "Replace `data/` with your licensed policies for a real tenant. "
         "Rebuild: `python -m src.ingest`."
@@ -165,7 +161,7 @@ Client-style PDFs live in the repo `source/` folder (what an HR team would typic
 
 @st.cache_resource(show_spinner=False)
 def load_engine():
-    return get_query_engine()
+    return get_chat_engine()
 
 
 try:
@@ -322,99 +318,97 @@ def _source_payload(response, question: str = "", answer: str = "") -> list[dict
     return rows
 
 
-def run_question(question: str) -> bool:
+def _render_sources(sources: list[dict]) -> None:
+    with st.expander("Sources — verify before acting", expanded=False):
+        if not sources:
+            st.write("No sources returned — do not act on an ungrounded answer.")
+            return
+        for j, src in enumerate(sources, 1):
+            st.markdown(
+                f"**Source {j}** · `{src['file']}` · relevance {src['score']:.2f}"
+            )
+            st.write(src["snippet"])
+            if j < len(sources):
+                st.divider()
+
+
+def _queue_user_message(question: str) -> None:
     q = (question or "").strip()
     if not q:
-        st.warning("Enter a question first.")
-        return False
-
+        return
+    st.session_state.history.append({"role": "user", "content": q})
     block = _limits_block()
     if block:
-        st.warning(block)
-        return False
+        st.session_state.history.append(
+            {
+                "role": "assistant",
+                "content": block,
+                "sources": [],
+                "system_note": True,
+            }
+        )
 
-    with st.spinner("Finding sources and drafting an answer…"):
-        try:
-            response = engine.query(q)
-        except Exception as exc:  # noqa: BLE001
-            st.error(f"Query failed: {exc}")
-            return False
 
+def _generate_assistant_reply() -> None:
+    turns = st.session_state.history
+    if not turns or turns[-1]["role"] != "user":
+        return
+
+    q = turns[-1]["content"]
+    prior = turns[:-1]
+    response = chat_query(engine, q, prior)
     answer = response.response or ""
-    sources = _source_payload(response, question=q, answer=answer)
-    st.session_state.history.insert(
-        0,
-        {"question": q, "answer": answer, "sources": sources},
+    snippet_q = condensed_question_from_response(response) or q
+    sources = _source_payload(response, question=snippet_q, answer=answer)
+    st.session_state.history.append(
+        {"role": "assistant", "content": answer, "sources": sources}
     )
     st.session_state.ask_count += 1
     st.session_state.last_ask_ts = time.time()
-    st.session_state.prefill = ""
-    return True
 
 
-# ---------- Main: clean executive session ----------
+# ---------- Main ----------
 st.markdown('<div class="hr-kicker">Employee self-serve</div>', unsafe_allow_html=True)
 st.title(PRODUCT_NAME)
 st.caption(PRODUCT_TAGLINE)
-
-# One quiet sample-data line — not a heavy banner stack
 st.markdown(
-    f'<p class="hr-subtle">{SAMPLE_COMPANY_NOTE} '
-    "Ask leave, profile, hybrid work, or expenses — answers cite the handbook pack.</p>",
+    f'<p class="hr-subtle">{SAMPLE_COMPANY_NOTE}</p>',
     unsafe_allow_html=True,
 )
 
-# Auto-run example from sidebar
-if st.session_state.auto_ask and st.session_state.prefill:
-    q = st.session_state.prefill
-    st.session_state.auto_ask = False
-    run_question(q)
-    st.session_state.input_key += 1
+if not st.session_state.history:
+    with st.chat_message("assistant"):
+        st.markdown(WELCOME_MESSAGE)
+
+for turn in st.session_state.history:
+    with st.chat_message(turn["role"]):
+        st.markdown(turn["content"])
+        if turn["role"] == "assistant" and "sources" in turn:
+            _render_sources(turn.get("sources") or [])
+
+if st.session_state.pending_question:
+    _queue_user_message(st.session_state.pending_question)
+    st.session_state.pending_question = None
     st.rerun()
 
-with st.form(key=f"ask_form_{st.session_state.input_key}", clear_on_submit=True):
-    query = st.text_input(
-        "Question",
-        value=st.session_state.prefill,
-        placeholder="e.g. How do I request annual leave?",
-        label_visibility="collapsed",
-    )
-    cols = st.columns([1, 4])
-    with cols[0]:
-        submitted = st.form_submit_button("Ask", type="primary", use_container_width=True)
-
-if submitted:
-    if run_question(query):
-        st.session_state.input_key += 1
-        st.rerun()
-
-# Conversation stream
-if st.session_state.history:
-    st.markdown("##### Session")
-    for i, turn in enumerate(st.session_state.history):
-        with st.container(border=True):
-            st.markdown('<div class="hr-q">You</div>', unsafe_allow_html=True)
-            st.markdown(turn["question"])
-            st.markdown(
-                '<div class="hr-q" style="margin-top:0.85rem">HR Agent</div>',
-                unsafe_allow_html=True,
+if (
+    st.session_state.history
+    and st.session_state.history[-1]["role"] == "user"
+):
+    with st.spinner("Finding sources and drafting an answer…"):
+        try:
+            _generate_assistant_reply()
+        except Exception as exc:  # noqa: BLE001
+            st.session_state.history.append(
+                {
+                    "role": "assistant",
+                    "content": f"Sorry, I could not answer that: {exc}",
+                    "sources": [],
+                    "system_note": True,
+                }
             )
-            st.markdown(turn["answer"])
-            with st.expander("Sources — verify before acting", expanded=False):
-                if not turn["sources"]:
-                    st.write("No sources returned — do not act on an ungrounded answer.")
-                for j, src in enumerate(turn["sources"], 1):
-                    st.markdown(
-                        f"**Source {j}** · `{src['file']}` · relevance {src['score']:.2f}"
-                    )
-                    st.write(src["snippet"])
-                    if j < len(turn["sources"]):
-                        st.divider()
-        if i < len(st.session_state.history) - 1:
-            st.write("")
-else:
-    st.markdown(
-        '<p class="hr-subtle">Start with a question above, or pick an example in the left panel. '
-        "Every answer includes sources you can open and check.</p>",
-        unsafe_allow_html=True,
-    )
+    st.rerun()
+
+if prompt := st.chat_input("Ask about leave, hybrid work, expenses, or profile updates…"):
+    _queue_user_message(prompt)
+    st.rerun()

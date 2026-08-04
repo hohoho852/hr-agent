@@ -73,7 +73,7 @@ Runtime indexing uses the machine-readable pack in [`data/`](data/) (same polici
 | Embeddings | Local `BAAI/bge-small-en-v1.5` | Handbook text stays on-machine |
 | Vector store | Chroma | Persistent local index |
 | Orchestration | LlamaIndex | Ingest / retrieve / query path |
-| UI | Streamlit | Lightweight employee / demo UI |
+| UI | Streamlit | Multi-turn chat with citations per reply |
 
 Company deploy (private + SSO): IT picks **Path A** (cloud-neutral) or **Path B** (Azure/M365) — same product. See [`docs/DEPLOY-A-vs-B.md`](docs/DEPLOY-A-vs-B.md).
 
@@ -96,7 +96,7 @@ cp .env.example .env
 
 python -m src.ingest               # build local vector index from data/
 python -m src.query --question "How do I request annual leave?"
-streamlit run app.py
+streamlit run app.py               # chat UI — follow-ups supported in-session
 python -m src.eval                 # regression suite
 ```
 
