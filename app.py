@@ -229,6 +229,7 @@ with st.sidebar:
             st.rerun()
 
     st.markdown("---")
+    st.caption("Conversation")
     active_id = st.session_state.active_conversation_id
     sorted_chats = sorted(
         (
