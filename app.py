@@ -113,12 +113,48 @@ st.markdown(
         background: #f3f3f3;
         color: #111;
     }
-    /* Chat bubbles via column layout (reliable vs fragile :has() avatar CSS) */
+    /* Chat bubbles via column layout + avatar badges */
+    .hr-msg-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.55rem;
+        margin: 0.35rem 0 0.85rem;
+        width: 100%;
+    }
+    .hr-msg-row.user {
+        justify-content: flex-end;
+    }
+    .hr-msg-row.assistant {
+        justify-content: flex-start;
+    }
+    .hr-avatar {
+        flex: 0 0 auto;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        line-height: 1;
+        user-select: none;
+    }
+    .hr-avatar-user {
+        background: #1d4ed8;
+        color: #ffffff;
+        border: 1px solid #1e40af;
+    }
+    .hr-avatar-assistant {
+        background: #e5e7eb;
+        color: #111827;
+        border: 1px solid #d1d5db;
+    }
     .hr-bubble {
         border-radius: 1.15rem;
         padding: 0.7rem 1rem;
         line-height: 1.5;
         word-wrap: break-word;
+        max-width: calc(100% - 2.6rem);
     }
     .hr-bubble p { margin-bottom: 0.4rem; }
     .hr-bubble p:last-child { margin-bottom: 0; }
@@ -133,9 +169,6 @@ st.markdown(
         background: #f3f4f6;
         border: 1px solid #e5e7eb;
         color: #111827;
-    }
-    .hr-msg-row {
-        margin: 0.35rem 0 0.85rem;
     }
     [data-testid="stChatInput"] textarea {
         border: 1px solid #e5e7eb !important;
@@ -419,23 +452,33 @@ def _md_to_html(content: str) -> str:
 
 
 def _render_user_bubble(content: str) -> None:
-    """User message aligned right (ChatGPT / Grok pattern)."""
+    """User message aligned right with avatar (ChatGPT / Grok pattern)."""
     body = _md_to_html(content)
     left, right = st.columns([1, 2], gap="small")
     with right:
         st.markdown(
-            f'''<div class="hr-msg-row"><div class="hr-bubble hr-bubble-user">{body}</div></div>''',
+            (
+                '<div class="hr-msg-row user">'
+                f'<div class="hr-bubble hr-bubble-user">{body}</div>'
+                '<div class="hr-avatar hr-avatar-user" title="You" aria-label="You">👤</div>'
+                '</div>'
+            ),
             unsafe_allow_html=True,
         )
 
 
 def _render_assistant_bubble(content: str, sources: list | None = None) -> None:
-    """Assistant message aligned left with optional sources."""
+    """Assistant message aligned left with avatar and optional sources."""
     body = _md_to_html(content)
     left, right = st.columns([2, 1], gap="small")
     with left:
         st.markdown(
-            f'''<div class="hr-msg-row"><div class="hr-bubble hr-bubble-assistant">{body}</div></div>''',
+            (
+                '<div class="hr-msg-row assistant">'
+                '<div class="hr-avatar hr-avatar-assistant" title="HR Agent" aria-label="HR Agent">📋</div>'
+                f'<div class="hr-bubble hr-bubble-assistant">{body}</div>'
+                '</div>'
+            ),
             unsafe_allow_html=True,
         )
         if sources is not None:
