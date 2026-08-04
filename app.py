@@ -1,9 +1,10 @@
-"""Streamlit UI — HR Agent (minimal chat shell)."""
+"""Streamlit UI — HR Agent (ChatGPT-style chat shell)."""
 
 from __future__ import annotations
 
 import sys
 import time
+import uuid
 from pathlib import Path
 
 import streamlit as st
@@ -37,12 +38,13 @@ EXAMPLE_QUESTIONS = [
 ]
 
 EMPTY_STATE_TAGLINE = "Policy and HR how-tos, with sources. Inform only."
+TITLE_MAX_LEN = 40
 
 st.set_page_config(
     page_title=PRODUCT_NAME,
     page_icon="📋",
-    layout="centered",
-    initial_sidebar_state="collapsed",
+    layout="wide",
+    initial_sidebar_state="expanded",
 )
 
 st.markdown(
@@ -51,25 +53,23 @@ st.markdown(
     #MainMenu, footer, header[data-testid="stHeader"] {
         visibility: hidden;
     }
-    .block-container {
-        padding-top: 0.75rem;
-        padding-bottom: 0.5rem;
-        max-width: 760px;
+    section[data-testid="stSidebar"] {
+        background: #f7f7f8;
     }
-    .hr-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0.35rem 0 1rem;
-        border-bottom: 1px solid #ececec;
-        margin-bottom: 0.5rem;
+    section[data-testid="stSidebar"] .block-container {
+        padding-top: 1rem;
     }
-    .hr-header-title {
-        font-size: 1.05rem;
+    .sidebar-brand {
+        font-size: 0.95rem;
         font-weight: 600;
         color: #1a1a1a;
-        margin: 0;
+        margin: 0 0 0.75rem;
         letter-spacing: -0.01em;
+    }
+    .main .block-container {
+        padding-top: 0.75rem;
+        padding-bottom: 0.5rem;
+        max-width: 780px;
     }
     .empty-state {
         text-align: center;
@@ -113,43 +113,120 @@ st.markdown(
         background: #f3f3f3;
         color: #111;
     }
+    /* Assistant: default left alignment */
     [data-testid="stChatMessage"] {
         max-width: 100%;
     }
-    section[data-testid="stSidebar"] {
-        background: #fafafa;
+    /* User: bubble on the right (ChatGPT / Grok pattern) */
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
+        flex-direction: row-reverse;
     }
-    .hr-subtle {
-        color: #6b7280;
-        font-size: 0.85rem;
-        line-height: 1.45;
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"])
+    [data-testid="stChatMessageContent"] {
+        background: #f4f4f4;
+        border-radius: 1.25rem;
+        padding: 0.65rem 1rem;
+        max-width: min(75%, 42rem);
+        margin-left: auto;
+    }
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"])
+    [data-testid="stChatMessageContent"] {
+        max-width: min(85%, 46rem);
     }
 </style>
 """,
     unsafe_allow_html=True,
 )
 
-# --- session state ---
-if "history" not in st.session_state:
-    st.session_state.history = []
-if "ask_count" not in st.session_state:
-    st.session_state.ask_count = 0
-if "last_ask_ts" not in st.session_state:
-    st.session_state.last_ask_ts = 0.0
-if "pending_question" not in st.session_state:
+
+def _new_conversation_id() -> str:
+    return uuid.uuid4().hex[:12]
+
+
+def _empty_conversation() -> dict:
+    now = time.time()
+    return {
+        "title": "New chat",
+        "messages": [],
+        "created_at": now,
+        "updated_at": now,
+    }
+
+
+def _init_session_state() -> None:
+    if "conversations" not in st.session_state:
+        cid = _new_conversation_id()
+        st.session_state.conversations = {cid: _empty_conversation()}
+        st.session_state.active_conversation_id = cid
+    if "ask_count" not in st.session_state:
+        st.session_state.ask_count = 0
+    if "last_ask_ts" not in st.session_state:
+        st.session_state.last_ask_ts = 0.0
+    if "pending_question" not in st.session_state:
+        st.session_state.pending_question = None
+
+
+_init_session_state()
+
+
+def _active_conversation() -> dict:
+    cid = st.session_state.active_conversation_id
+    return st.session_state.conversations[cid]
+
+
+def _active_messages() -> list:
+    return _active_conversation()["messages"]
+
+
+def _title_from_message(text: str) -> str:
+    t = (text or "").strip().replace("\n", " ")
+    if not t:
+        return "New chat"
+    if len(t) <= TITLE_MAX_LEN:
+        return t
+    return t[: TITLE_MAX_LEN - 1].rstrip() + "…"
+
+
+def _start_new_chat() -> None:
+    cid = _new_conversation_id()
+    st.session_state.conversations[cid] = _empty_conversation()
+    st.session_state.active_conversation_id = cid
     st.session_state.pending_question = None
 
 
-def _new_chat() -> None:
-    st.session_state.history = []
-    st.session_state.pending_question = None
+def _switch_chat(conversation_id: str) -> None:
+    if conversation_id in st.session_state.conversations:
+        st.session_state.active_conversation_id = conversation_id
+        st.session_state.pending_question = None
 
 
-# ---------- Sidebar (minimal) ----------
+# ---------- Sidebar ----------
 with st.sidebar:
-    if st.button("New chat", use_container_width=True):
-        _new_chat()
+    st.markdown(f'<p class="sidebar-brand">{PRODUCT_NAME}</p>', unsafe_allow_html=True)
+    if st.button("New chat", use_container_width=True, type="primary"):
+        _start_new_chat()
         st.rerun()
+
+    st.markdown("---")
+    active_id = st.session_state.active_conversation_id
+    sorted_chats = sorted(
+        st.session_state.conversations.items(),
+        key=lambda item: item[1]["updated_at"],
+        reverse=True,
+    )
+    for cid, conv in sorted_chats:
+        label = conv["title"] or "New chat"
+        if st.button(
+            label,
+            key=f"conv_{cid}",
+            use_container_width=True,
+            type="primary" if cid == active_id else "secondary",
+        ):
+            if cid != active_id:
+                _switch_chat(cid)
+                st.rerun()
+
+    st.markdown("---")
     if demo_limits_enabled():
         limit = demo_session_limit()
         st.caption(
@@ -211,46 +288,10 @@ def _limits_block() -> str | None:
 
 def _keyword_terms(*texts: str) -> list[str]:
     stop = {
-        "a",
-        "an",
-        "the",
-        "and",
-        "or",
-        "to",
-        "of",
-        "in",
-        "on",
-        "for",
-        "do",
-        "we",
-        "i",
-        "my",
-        "is",
-        "are",
-        "how",
-        "many",
-        "much",
-        "what",
-        "when",
-        "where",
-        "who",
-        "with",
-        "from",
-        "this",
-        "that",
-        "have",
-        "has",
-        "get",
-        "got",
-        "can",
-        "you",
-        "your",
-        "our",
-        "me",
-        "please",
-        "about",
-        "does",
-        "did",
+        "a", "an", "the", "and", "or", "to", "of", "in", "on", "for", "do",
+        "we", "i", "my", "is", "are", "how", "many", "much", "what", "when",
+        "where", "who", "with", "from", "this", "that", "have", "has", "get",
+        "got", "can", "you", "your", "our", "me", "please", "about", "does", "did",
     }
     seen: set[str] = set()
     out: list[str] = []
@@ -345,10 +386,14 @@ def _queue_user_message(question: str) -> None:
     q = (question or "").strip()
     if not q:
         return
-    st.session_state.history.append({"role": "user", "content": q})
+    conv = _active_conversation()
+    if not conv["messages"]:
+        conv["title"] = _title_from_message(q)
+    conv["messages"].append({"role": "user", "content": q})
+    conv["updated_at"] = time.time()
     block = _limits_block()
     if block:
-        st.session_state.history.append(
+        conv["messages"].append(
             {
                 "role": "assistant",
                 "content": block,
@@ -359,19 +404,21 @@ def _queue_user_message(question: str) -> None:
 
 
 def _generate_assistant_reply() -> None:
-    turns = st.session_state.history
-    if not turns or turns[-1]["role"] != "user":
+    messages = _active_messages()
+    if not messages or messages[-1]["role"] != "user":
         return
 
-    q = turns[-1]["content"]
-    prior = turns[:-1]
+    q = messages[-1]["content"]
+    prior = messages[:-1]
     response = chat_query(engine, q, prior)
     answer = response.response or ""
     snippet_q = condensed_question_from_response(response) or q
     sources = _source_payload(response, question=snippet_q, answer=answer)
-    st.session_state.history.append(
+    conv = _active_conversation()
+    conv["messages"].append(
         {"role": "assistant", "content": answer, "sources": sources}
     )
+    conv["updated_at"] = time.time()
     st.session_state.ask_count += 1
     st.session_state.last_ask_ts = time.time()
 
@@ -394,19 +441,13 @@ def _render_empty_state() -> None:
                 st.rerun()
 
 
-# ---------- Main ----------
-hdr_left, hdr_right = st.columns([5, 1])
-with hdr_left:
-    st.markdown(f'<p class="hr-header-title">{PRODUCT_NAME}</p>', unsafe_allow_html=True)
-with hdr_right:
-    if st.button("New chat", key="header_new_chat"):
-        _new_chat()
-        st.rerun()
+# ---------- Main thread ----------
+messages = _active_messages()
 
-if not st.session_state.history:
+if not messages:
     _render_empty_state()
 else:
-    for turn in st.session_state.history:
+    for turn in messages:
         with st.chat_message(turn["role"]):
             st.markdown(turn["content"])
             if turn["role"] == "assistant" and "sources" in turn:
@@ -417,15 +458,13 @@ if st.session_state.pending_question:
     st.session_state.pending_question = None
     st.rerun()
 
-if (
-    st.session_state.history
-    and st.session_state.history[-1]["role"] == "user"
-):
+if messages and messages[-1]["role"] == "user":
     with st.spinner("Finding sources and drafting an answer…"):
         try:
             _generate_assistant_reply()
         except Exception as exc:  # noqa: BLE001
-            st.session_state.history.append(
+            conv = _active_conversation()
+            conv["messages"].append(
                 {
                     "role": "assistant",
                     "content": f"Sorry, I could not answer that: {exc}",
@@ -433,6 +472,7 @@ if (
                     "system_note": True,
                 }
             )
+            conv["updated_at"] = time.time()
     st.rerun()
 
 if prompt := st.chat_input(
