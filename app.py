@@ -117,21 +117,38 @@ st.markdown(
     [data-testid="stChatMessage"] {
         max-width: 100%;
     }
-    /* User: bubble on the right (ChatGPT / Grok pattern) */
+    /* User: bubble on the right (ChatGPT pattern) */
     [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
         flex-direction: row-reverse;
     }
     [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"])
     [data-testid="stChatMessageContent"] {
-        background: #f4f4f4;
+        background: #2563eb;
+        color: #ffffff;
         border-radius: 1.25rem;
         padding: 0.65rem 1rem;
         max-width: min(75%, 42rem);
         margin-left: auto;
     }
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"])
+    [data-testid="stChatMessageContent"] p {
+        color: #ffffff;
+    }
     [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"])
     [data-testid="stChatMessageContent"] {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 1.25rem;
+        padding: 0.65rem 1rem;
+        color: #1a1a1a;
         max-width: min(85%, 46rem);
+    }
+    [data-testid="stChatInput"] textarea {
+        border: 1px solid #e5e7eb !important;
+    }
+    [data-testid="stChatInput"]:focus-within textarea {
+        border-color: #2563eb !important;
+        box-shadow: 0 0 0 1px #2563eb !important;
     }
 </style>
 """,
@@ -162,8 +179,6 @@ def _init_session_state() -> None:
         st.session_state.ask_count = 0
     if "last_ask_ts" not in st.session_state:
         st.session_state.last_ask_ts = 0.0
-    if "pending_question" not in st.session_state:
-        st.session_state.pending_question = None
 
 
 _init_session_state()
@@ -187,35 +202,45 @@ def _title_from_message(text: str) -> str:
     return t[: TITLE_MAX_LEN - 1].rstrip() + "…"
 
 
-def _start_new_chat() -> None:
+def _conversation_has_messages(conv: dict) -> bool:
+    return bool(conv.get("messages"))
+
+
+def _start_new_chat() -> bool:
+    """Start a fresh chat. No-op if the active chat is already empty."""
+    if not _conversation_has_messages(_active_conversation()):
+        return False
     cid = _new_conversation_id()
     st.session_state.conversations[cid] = _empty_conversation()
     st.session_state.active_conversation_id = cid
-    st.session_state.pending_question = None
+    return True
 
 
 def _switch_chat(conversation_id: str) -> None:
     if conversation_id in st.session_state.conversations:
         st.session_state.active_conversation_id = conversation_id
-        st.session_state.pending_question = None
 
 
 # ---------- Sidebar ----------
 with st.sidebar:
     st.markdown(f'<p class="sidebar-brand">{PRODUCT_NAME}</p>', unsafe_allow_html=True)
     if st.button("New chat", use_container_width=True, type="primary"):
-        _start_new_chat()
-        st.rerun()
+        if _start_new_chat():
+            st.rerun()
 
     st.markdown("---")
     active_id = st.session_state.active_conversation_id
     sorted_chats = sorted(
-        st.session_state.conversations.items(),
+        (
+            (cid, conv)
+            for cid, conv in st.session_state.conversations.items()
+            if _conversation_has_messages(conv)
+        ),
         key=lambda item: item[1]["updated_at"],
         reverse=True,
     )
     for cid, conv in sorted_chats:
-        label = conv["title"] or "New chat"
+        label = conv["title"] or "Chat"
         if st.button(
             label,
             key=f"conv_{cid}",
@@ -382,15 +407,21 @@ def _render_sources(sources: list[dict]) -> None:
                 st.divider()
 
 
-def _queue_user_message(question: str) -> None:
+def _send_user_message(question: str) -> None:
+    """Append user turn, render optimistically, then assistant reply in one run."""
     q = (question or "").strip()
     if not q:
         return
+
     conv = _active_conversation()
     if not conv["messages"]:
         conv["title"] = _title_from_message(q)
     conv["messages"].append({"role": "user", "content": q})
     conv["updated_at"] = time.time()
+
+    with st.chat_message("user"):
+        st.markdown(q)
+
     block = _limits_block()
     if block:
         conv["messages"].append(
@@ -401,22 +432,38 @@ def _queue_user_message(question: str) -> None:
                 "system_note": True,
             }
         )
-
-
-def _generate_assistant_reply() -> None:
-    messages = _active_messages()
-    if not messages or messages[-1]["role"] != "user":
+        with st.chat_message("assistant"):
+            st.markdown(block)
         return
 
-    q = messages[-1]["content"]
-    prior = messages[:-1]
-    response = chat_query(engine, q, prior)
-    answer = response.response or ""
-    snippet_q = condensed_question_from_response(response) or q
-    sources = _source_payload(response, question=snippet_q, answer=answer)
-    conv = _active_conversation()
+    answer = ""
+    sources: list[dict] = []
+    system_note = False
+
+    with st.chat_message("assistant"):
+        with st.spinner("Finding sources and drafting an answer…"):
+            try:
+                prior = conv["messages"][:-1]
+                response = chat_query(engine, q, prior)
+                answer = response.response or ""
+                snippet_q = condensed_question_from_response(response) or q
+                sources = _source_payload(response, question=snippet_q, answer=answer)
+            except Exception as exc:  # noqa: BLE001
+                answer = f"Sorry, I could not answer that: {exc}"
+                sources = []
+                system_note = True
+
+        st.markdown(answer)
+        if sources:
+            _render_sources(sources)
+
     conv["messages"].append(
-        {"role": "assistant", "content": answer, "sources": sources}
+        {
+            "role": "assistant",
+            "content": answer,
+            "sources": sources,
+            **({"system_note": True} if system_note else {}),
+        }
     )
     conv["updated_at"] = time.time()
     st.session_state.ask_count += 1
@@ -437,46 +484,25 @@ def _render_empty_state() -> None:
     for i, q in enumerate(EXAMPLE_QUESTIONS):
         with cols[i % 2]:
             if st.button(q, key=f"chip_{i}"):
-                st.session_state.pending_question = q
+                st.session_state.chip_question = q
                 st.rerun()
 
 
 # ---------- Main thread ----------
 messages = _active_messages()
+chip_question = st.session_state.pop("chip_question", None)
+prompt = st.chat_input("Ask anything about leave, hybrid work, expenses…")
+incoming = chip_question or prompt
 
-if not messages:
+for turn in messages:
+    with st.chat_message(turn["role"]):
+        st.markdown(turn["content"])
+        if turn["role"] == "assistant" and "sources" in turn:
+            _render_sources(turn.get("sources") or [])
+
+if not messages and incoming is None:
     _render_empty_state()
-else:
-    for turn in messages:
-        with st.chat_message(turn["role"]):
-            st.markdown(turn["content"])
-            if turn["role"] == "assistant" and "sources" in turn:
-                _render_sources(turn.get("sources") or [])
 
-if st.session_state.pending_question:
-    _queue_user_message(st.session_state.pending_question)
-    st.session_state.pending_question = None
-    st.rerun()
-
-if messages and messages[-1]["role"] == "user":
-    with st.spinner("Finding sources and drafting an answer…"):
-        try:
-            _generate_assistant_reply()
-        except Exception as exc:  # noqa: BLE001
-            conv = _active_conversation()
-            conv["messages"].append(
-                {
-                    "role": "assistant",
-                    "content": f"Sorry, I could not answer that: {exc}",
-                    "sources": [],
-                    "system_note": True,
-                }
-            )
-            conv["updated_at"] = time.time()
-    st.rerun()
-
-if prompt := st.chat_input(
-    "Ask anything about leave, hybrid work, expenses…"
-):
-    _queue_user_message(prompt)
+if incoming:
+    _send_user_message(incoming)
     st.rerun()
