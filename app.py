@@ -1,4 +1,4 @@
-"""Streamlit UI — HR Agent (employee self-serve chat demo)."""
+"""Streamlit UI — HR Agent (minimal chat shell)."""
 
 from __future__ import annotations
 
@@ -14,7 +14,6 @@ if str(ROOT) not in sys.path:
 
 from src.config import (
     PRODUCT_NAME,
-    PRODUCT_TAGLINE,
     SAMPLE_COMPANY_NAME,
     SAMPLE_COMPANY_NOTE,
     demo_cooldown_sec,
@@ -37,66 +36,93 @@ EXAMPLE_QUESTIONS = [
     "When should I contact HR instead of self-serve?",
 ]
 
-WELCOME_MESSAGE = (
-    "I answer questions about **company policy** and **standard HR how-tos** "
-    "using your handbook pack, with sources on every reply.\n\n"
-    "**Hard boundary:** I inform only — I do **not** submit leave, change pay, "
-    "update your profile, or approve exceptions. For those, use your HR system or "
-    "open an HR ticket."
-)
+EMPTY_STATE_TAGLINE = "Policy and HR how-tos, with sources. Inform only."
 
 st.set_page_config(
     page_title=PRODUCT_NAME,
     page_icon="📋",
-    layout="wide",
-    initial_sidebar_state="expanded",
+    layout="centered",
+    initial_sidebar_state="collapsed",
 )
 
 st.markdown(
     """
 <style>
+    #MainMenu, footer, header[data-testid="stHeader"] {
+        visibility: hidden;
+    }
     .block-container {
-        padding-top: 1.25rem;
-        padding-bottom: 1rem;
-        max-width: 820px;
+        padding-top: 0.75rem;
+        padding-bottom: 0.5rem;
+        max-width: 760px;
     }
-    h1 {
-        font-weight: 650 !important;
-        letter-spacing: -0.02em;
-        margin-bottom: 0.15rem !important;
+    .hr-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.35rem 0 1rem;
+        border-bottom: 1px solid #ececec;
+        margin-bottom: 0.5rem;
     }
-    [data-testid="stCaption"] {
-        color: #5b6570 !important;
-        font-size: 0.98rem !important;
-    }
-    section[data-testid="stSidebar"] {
-        background: #f4f6f9;
-        border-right: 1px solid #e4e8ef;
-    }
-    section[data-testid="stSidebar"] h1,
-    section[data-testid="stSidebar"] h2,
-    section[data-testid="stSidebar"] h3 {
+    .hr-header-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin: 0;
         letter-spacing: -0.01em;
     }
-    .hr-kicker {
-        display: inline-block;
-        font-size: 0.72rem;
-        font-weight: 600;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: #3d5a80;
-        background: #e8eef6;
-        border-radius: 999px;
-        padding: 0.22rem 0.65rem;
-        margin-bottom: 0.55rem;
+    .empty-state {
+        text-align: center;
+        padding: 3.5rem 1rem 2rem;
     }
-    .hr-subtle {
+    .empty-state h1 {
+        font-size: 1.75rem !important;
+        font-weight: 650 !important;
+        letter-spacing: -0.03em;
+        margin: 0 0 0.5rem !important;
+        color: #1a1a1a;
+    }
+    .empty-state p {
         color: #6b7280;
-        font-size: 0.9rem;
-        line-height: 1.45;
+        font-size: 0.95rem;
+        margin: 0 0 1.75rem;
+        line-height: 1.5;
+    }
+    .chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+        max-width: 640px;
+        margin: 0 auto;
+    }
+    div[data-testid="column"] .stButton > button {
+        border-radius: 999px;
+        border: 1px solid #e0e0e0;
+        background: #fafafa;
+        color: #374151;
+        font-size: 0.85rem;
+        padding: 0.35rem 0.85rem;
+        white-space: normal;
+        height: auto;
+        min-height: 2.25rem;
+        line-height: 1.3;
+    }
+    div[data-testid="column"] .stButton > button:hover {
+        border-color: #c8c8c8;
+        background: #f3f3f3;
+        color: #111;
     }
     [data-testid="stChatMessage"] {
         max-width: 100%;
+    }
+    section[data-testid="stSidebar"] {
+        background: #fafafa;
+    }
+    .hr-subtle {
+        color: #6b7280;
+        font-size: 0.85rem;
+        line-height: 1.45;
     }
 </style>
 """,
@@ -113,50 +139,33 @@ if "last_ask_ts" not in st.session_state:
 if "pending_question" not in st.session_state:
     st.session_state.pending_question = None
 
-# ---------- Sidebar ----------
+
+def _new_chat() -> None:
+    st.session_state.history = []
+    st.session_state.pending_question = None
+
+
+# ---------- Sidebar (minimal) ----------
 with st.sidebar:
-    st.markdown(f"### {PRODUCT_NAME}")
-    st.caption(PRODUCT_TAGLINE)
-    st.markdown(
-        f"""
-**What this is**  
-An employee assistant for **company policy** and **standard HR how-tos**, with a citation on every answer.
-
-**Who uses it**  
-- Employees — self-serve answers  
-- People Ops — deflect repetitive Tier-1 volume  
-
-**Hard boundary**  
-Informs only. Does **not** submit leave, change pay, or approve exceptions.
-
-**Sample employer**  
-{SAMPLE_COMPANY_NAME} (fictional). Not a real company handbook.
-
-**Source documents**  
-Client-style PDFs live in the repo `source/` folder (what an HR team would typically provide). The runtime index is built from `data/` (same content, machine-readable).
-"""
-    )
+    if st.button("New chat", use_container_width=True):
+        _new_chat()
+        st.rerun()
     if demo_limits_enabled():
         limit = demo_session_limit()
         st.caption(
-            f"Demo session: {st.session_state.ask_count}/{limit} questions · "
-            f"{int(demo_cooldown_sec())}s between asks"
+            f"{st.session_state.ask_count}/{limit} questions · "
+            f"{int(demo_cooldown_sec())}s cooldown"
         )
-    st.divider()
-    st.markdown("**Try a question**")
-    for i, q in enumerate(EXAMPLE_QUESTIONS):
-        if st.button(q, key=f"ex_{i}", use_container_width=True):
-            st.session_state.pending_question = q
-            st.rerun()
-    if st.button("New conversation", use_container_width=True):
-        # Clear transcript only; keep ask_count so demo session limits still apply.
-        st.session_state.history = []
-        st.session_state.pending_question = None
-        st.rerun()
-    st.caption(
-        "Replace `data/` with your licensed policies for a real tenant. "
-        "Rebuild: `python -m src.ingest`."
-    )
+    with st.expander("About"):
+        st.markdown(
+            f"""
+**Sample employer:** {SAMPLE_COMPANY_NAME} (fictional).
+
+{SAMPLE_COMPANY_NOTE}
+
+**Boundary:** Informs only — does not submit leave, change pay, or approve exceptions.
+"""
+        )
 
 
 @st.cache_resource(show_spinner=False)
@@ -367,24 +376,41 @@ def _generate_assistant_reply() -> None:
     st.session_state.last_ask_ts = time.time()
 
 
+def _render_empty_state() -> None:
+    st.markdown(
+        f"""
+<div class="empty-state">
+  <h1>{PRODUCT_NAME}</h1>
+  <p>{EMPTY_STATE_TAGLINE}</p>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
+    cols = st.columns(2)
+    for i, q in enumerate(EXAMPLE_QUESTIONS):
+        with cols[i % 2]:
+            if st.button(q, key=f"chip_{i}"):
+                st.session_state.pending_question = q
+                st.rerun()
+
+
 # ---------- Main ----------
-st.markdown('<div class="hr-kicker">Employee self-serve</div>', unsafe_allow_html=True)
-st.title(PRODUCT_NAME)
-st.caption(PRODUCT_TAGLINE)
-st.markdown(
-    f'<p class="hr-subtle">{SAMPLE_COMPANY_NOTE}</p>',
-    unsafe_allow_html=True,
-)
+hdr_left, hdr_right = st.columns([5, 1])
+with hdr_left:
+    st.markdown(f'<p class="hr-header-title">{PRODUCT_NAME}</p>', unsafe_allow_html=True)
+with hdr_right:
+    if st.button("New chat", key="header_new_chat"):
+        _new_chat()
+        st.rerun()
 
 if not st.session_state.history:
-    with st.chat_message("assistant"):
-        st.markdown(WELCOME_MESSAGE)
-
-for turn in st.session_state.history:
-    with st.chat_message(turn["role"]):
-        st.markdown(turn["content"])
-        if turn["role"] == "assistant" and "sources" in turn:
-            _render_sources(turn.get("sources") or [])
+    _render_empty_state()
+else:
+    for turn in st.session_state.history:
+        with st.chat_message(turn["role"]):
+            st.markdown(turn["content"])
+            if turn["role"] == "assistant" and "sources" in turn:
+                _render_sources(turn.get("sources") or [])
 
 if st.session_state.pending_question:
     _queue_user_message(st.session_state.pending_question)
@@ -409,6 +435,8 @@ if (
             )
     st.rerun()
 
-if prompt := st.chat_input("Ask about leave, hybrid work, expenses, or profile updates…"):
+if prompt := st.chat_input(
+    "Ask anything about leave, hybrid work, expenses…"
+):
     _queue_user_message(prompt)
     st.rerun()
