@@ -110,7 +110,7 @@ First ingest downloads the local embedding model (one-time).
 | `LLM_MODEL` | no | Model / deployment name |
 | `LLM_API_BASE` | no | OpenAI-compatible base URL |
 
-\*Legacy `DEEPSEEK_API_KEY` alone still works for existing demos (implies DeepSeek base + `deepseek-chat`).
+\*Legacy `DEEPSEEK_API_KEY` alone still works for existing demos (implies DeepSeek base + `deepseek-v4-flash`).
 
 ---
 
@@ -124,7 +124,7 @@ No Docker required. Point Streamlit at this repo with **Main file:** `app.py`.
 
 ```toml
 LLM_API_KEY = "your_key_here"
-LLM_MODEL = "deepseek-chat"
+LLM_MODEL = "deepseek-v4-flash"
 LLM_API_BASE = "https://api.deepseek.com/v1"
 ```
 

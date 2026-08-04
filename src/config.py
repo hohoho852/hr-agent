@@ -26,7 +26,7 @@ SIMILARITY_TOP_K = 4
 EMBED_MODEL_NAME = "BAAI/bge-small-en-v1.5"
 
 # Defaults favor a cheap OpenAI-compatible endpoint; override via env/secrets.
-DEFAULT_LLM_MODEL = "deepseek-chat"
+DEFAULT_LLM_MODEL = "deepseek-v4-flash"
 DEFAULT_LLM_API_BASE = "https://api.deepseek.com/v1"
 
 PRODUCT_NAME = "HR Agent"
@@ -152,12 +152,16 @@ def configure_settings() -> None:
     model = llm_model_name()
     api_base = llm_api_base()
 
-    # If only a legacy DeepSeek key is present and base was not set, keep demo default base.
+    # If only a legacy DeepSeek key is present and base was not set, keep demo default base + model.
     if api_base is None and _secret_get("DEEPSEEK_API_KEY") and not _secret_get(
         "LLM_API_KEY", "OPENAI_API_KEY"
     ):
         api_base = DEFAULT_LLM_API_BASE
-        if model == DEFAULT_LLM_MODEL or not _secret_get("LLM_MODEL", "OPENAI_MODEL"):
+        # Always prefer current default when caller did not pin LLM_MODEL / OPENAI_MODEL.
+        if not _secret_get("LLM_MODEL", "OPENAI_MODEL"):
+            model = DEFAULT_LLM_MODEL
+        # Migrate retired DeepSeek ids still sitting in old secrets/env.
+        elif model in {"deepseek-chat", "deepseek-reasoner"}:
             model = DEFAULT_LLM_MODEL
 
     llm_kwargs: dict = {
