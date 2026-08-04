@@ -12,7 +12,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from llama_index.core import Settings
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-from llama_index.llms.openai import OpenAI
+from llama_index.llms.openai_like import OpenAILike
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = PROJECT_ROOT / "data"
@@ -147,7 +147,11 @@ def require_api_key() -> str:
 
 
 def configure_settings() -> None:
-    """Wire embeddings + customer-chosen chat model (OpenAI-compatible client)."""
+    """Wire embeddings + customer-chosen chat model (OpenAI-compatible client).
+
+    Uses OpenAILike (not OpenAI) so non-OpenAI model ids like deepseek-v4-flash
+    are not rejected by LlamaIndex's OpenAI model-name allowlist.
+    """
     api_key = require_api_key()
     model = llm_model_name()
     api_base = llm_api_base()
@@ -164,13 +168,21 @@ def configure_settings() -> None:
         elif model in {"deepseek-chat", "deepseek-reasoner"}:
             model = DEFAULT_LLM_MODEL
 
+    # Retired DeepSeek ids even when LLM_MODEL is set explicitly in secrets.
+    if model in {"deepseek-chat", "deepseek-reasoner"}:
+        model = DEFAULT_LLM_MODEL
+
     llm_kwargs: dict = {
         "model": model,
         "api_key": api_key,
         "temperature": 0,
+        "is_chat_model": True,
+        "is_function_calling_model": False,
+        # Generous default; override via provider docs if needed.
+        "context_window": 128000,
     }
     if api_base:
         llm_kwargs["api_base"] = api_base
 
-    Settings.llm = OpenAI(**llm_kwargs)
+    Settings.llm = OpenAILike(**llm_kwargs)
     Settings.embed_model = HuggingFaceEmbedding(model_name=EMBED_MODEL_NAME)
