@@ -6,7 +6,13 @@ Employee-facing assistant for **company policy** and **standard HR how-tos**.
 
 Answers common questions (leave, hybrid work, expenses, profile updates) with **citations** from the employer handbook pack. Built so People Ops can deflect repetitive Tier-1 volume without the bot approving leave, changing pay, or handling exceptions.
 
-**Live demo:** [hr-agent-hohoho852.streamlit.app](https://hr-agent-hohoho852.streamlit.app/)
+**Live demo:** [hr-agent-hohoho852.streamlit.app](https://hr-agent-hohoho852.streamlit.app/) · **[Architecture (HTML)](docs/diagrams/demo-streamlit-architecture.html)** · [Production deploy](docs/DEPLOY-GUIDE.md)
+
+### Public demo architecture (Streamlit Community Cloud)
+
+![HR Agent public demo architecture on Streamlit Community Cloud](docs/diagrams/demo-streamlit-architecture.svg)
+
+Sample handbook only — not a private company SSO deploy. Full interactive diagram: [`docs/diagrams/demo-streamlit-architecture.html`](docs/diagrams/demo-streamlit-architecture.html). Production Path A/B: [`docs/diagrams/production-deploy-architecture.html`](docs/diagrams/production-deploy-architecture.html).
 
 ---
 
