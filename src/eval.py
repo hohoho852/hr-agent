@@ -5,11 +5,11 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-import time
 from pathlib import Path
 
-from src.config import project_root
+from src.config import llm_model_name, project_root
 from src.query import get_query_engine
+from src.query_log import record_query_call
 
 
 def _load_golden(path: Path) -> list[dict]:
@@ -41,17 +41,30 @@ def _retrieval_hit(source_nodes, expected_file_substr: str) -> bool:
     return False
 
 
+def _p95(values: list[float]) -> float:
+    if not values:
+        return 0.0
+    ordered = sorted(values)
+    idx = max(0, int(round(0.95 * (len(ordered) - 1))))
+    return ordered[idx]
+
+
 def evaluate(golden_path: Path | None = None) -> dict:
     root = project_root()
     path = golden_path or (root / "eval" / "golden_questions.json")
     cases = _load_golden(path)
     engine = get_query_engine()
+    model = llm_model_name()
     rows = []
     for case in cases:
         q = case["question"]
-        t0 = time.time()
-        response = engine.query(q)
-        latency = time.time() - t0
+        response, metrics = record_query_call(
+            lambda q=q: engine.query(q),
+            question=q,
+            model=model,
+            return_metrics=True,
+        )
+        latency = metrics["latency_s"]
         answer = getattr(response, "response", str(response))
         sources = getattr(response, "source_nodes", []) or []
         kw_ok = _keyword_hit(answer, case.get("must_include_any") or [])
@@ -69,7 +82,11 @@ def evaluate(golden_path: Path | None = None) -> dict:
             {
                 "id": case.get("id"),
                 "question": q,
-                "latency_s": round(latency, 3),
+                "latency_s": latency,
+                "prompt_tokens": metrics["prompt_tokens"],
+                "completion_tokens": metrics["completion_tokens"],
+                "est_cost_usd": metrics["est_cost_usd"],
+                "usage_source": metrics["usage_source"],
                 "keyword_hit": kw_ok,
                 "retrieval_hit": ret_ok,
                 "pass": bool(kw_ok and ret_ok),
@@ -78,16 +95,26 @@ def evaluate(golden_path: Path | None = None) -> dict:
             }
         )
         status = "PASS" if rows[-1]["pass"] else "FAIL"
-        print(f"[{status}] {case.get('id')} kw={kw_ok} retrieval={ret_ok} latency={latency:.2f}s")
+        print(
+            f"[{status}] {case.get('id')} kw={kw_ok} retrieval={ret_ok} "
+            f"latency={latency:.2f}s cost=${metrics['est_cost_usd']:.6f}"
+        )
 
     n = len(rows) or 1
+    latencies = [r["latency_s"] for r in rows]
+    costs = [r["est_cost_usd"] for r in rows]
+    total_cost = sum(costs)
     return {
         "product": "hr-agent",
+        "model": model,
         "cases": len(rows),
         "pass_rate": round(sum(1 for r in rows if r["pass"]) / n, 3),
         "keyword_hit_rate": round(sum(1 for r in rows if r["keyword_hit"]) / n, 3),
         "retrieval_hit_rate": round(sum(1 for r in rows if r["retrieval_hit"]) / n, 3),
-        "avg_latency_s": round(sum(r["latency_s"] for r in rows) / n, 3),
+        "avg_latency_s": round(sum(latencies) / n, 3),
+        "p95_latency_s": round(_p95(latencies), 3),
+        "total_est_cost_usd": round(total_cost, 6),
+        "avg_est_cost_usd": round(total_cost / n, 6),
         "results": rows,
     }
 
@@ -112,6 +139,9 @@ def main(argv: list[str] | None = None) -> int:
                 "keyword_hit_rate": summary["keyword_hit_rate"],
                 "retrieval_hit_rate": summary["retrieval_hit_rate"],
                 "avg_latency_s": summary["avg_latency_s"],
+                "p95_latency_s": summary["p95_latency_s"],
+                "total_est_cost_usd": summary["total_est_cost_usd"],
+                "avg_est_cost_usd": summary["avg_est_cost_usd"],
             },
             indent=2,
         )

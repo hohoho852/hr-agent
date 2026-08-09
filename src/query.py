@@ -21,6 +21,7 @@ from src.config import (
     configure_settings,
     project_root,
 )
+from src.query_log import record_query_call
 
 QA_PROMPT = PromptTemplate(
     QA_SYSTEM_PROMPT
@@ -170,7 +171,11 @@ def chat_query(
     chat_history = history_to_chat_messages(
         history or [], max_turns=max_history_turns
     )
-    return engine.chat(message, chat_history=chat_history)
+
+    def _call() -> AgentChatResponse:
+        return engine.chat(message, chat_history=chat_history)
+
+    return record_query_call(_call, question=message)
 
 
 def condensed_question_from_response(response: AgentChatResponse) -> str | None:
@@ -192,7 +197,10 @@ def main(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv)
     engine = get_query_engine()
     print(f"Q: {args.question}\n")
-    response = engine.query(args.question)
+    response = record_query_call(
+        lambda: engine.query(args.question),
+        question=args.question,
+    )
     print(response)
     print("\nSources:")
     for node in response.source_nodes:

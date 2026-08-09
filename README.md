@@ -143,15 +143,21 @@ hr-agent/
 ├── app.py                 # Streamlit UI
 ├── source/                # Client-style sample PDFs (audience-facing inputs)
 ├── data/                  # Runtime corpus (markdown; same sample policies)
-├── docs/PRODUCT.md        # product design
+├── docs/
+│   ├── PRODUCT.md
+│   ├── OPS.md                 # ops / logging / eval gate
+│   └── DEPLOY-A-vs-B.md
 ├── eval/
 │   ├── golden_questions.json
 │   └── last_report.json
 ├── src/
 │   ├── config.py
+│   ├── cost.py
 │   ├── ingest.py
 │   ├── query.py
-│   └── eval.py
+│   ├── query_log.py
+│   ├── eval.py
+│   └── ops_report.py
 ├── .env.example
 ├── LICENSE                # MIT
 └── README.md
@@ -192,7 +198,20 @@ python -m src.eval
 | Keyword coverage | Answer contains domain anchor phrases |
 | Latency | End-to-end query time |
 
-On the sample pack: **7/7** pass. Report: `eval/last_report.json`.
+On the sample pack: **7/7** pass. Report: `eval/last_report.json` (latency + cost rollups).
+
+---
+
+## Operations
+
+Live demo, secrets, demo limits, eval gate, request logging, and cost env vars: **[`docs/OPS.md`](docs/OPS.md)**.
+
+```bash
+python -m src.eval        # regression gate (7/7 on sample pack)
+python -m src.ops_report  # summarize runs/query_events.jsonl
+```
+
+**Live demo:** [hr-agent-hohoho852.streamlit.app](https://hr-agent-hohoho852.streamlit.app/)
 
 ---
 

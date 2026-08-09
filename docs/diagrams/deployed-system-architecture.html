@@ -1,0 +1,346 @@
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HR Agent — Deployed System Architecture</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f8fafc;
+    --fg: #172033;
+    --muted: #5b6475;
+    --line: #64748b;
+    --neutral: #e2e8f0;
+    --input: #bfdbfe;
+    --process: #c7d2fe;
+    --storage: #99f6e4;
+    --external: #fde68a;
+    --risk: #fecaca;
+    --new: #bbf7d0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f172a;
+      --fg: #e5e7eb;
+      --muted: #a3adbd;
+      --line: #94a3b8;
+      --neutral: #334155;
+      --input: #1d4ed8;
+      --process: #4338ca;
+      --storage: #0f766e;
+      --external: #92400e;
+      --risk: #991b1b;
+      --new: #166534;
+    }
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font:
+      14px/1.4 ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+  }
+  main {
+    max-width: 1100px;
+    margin: 28px auto;
+    padding: 0 20px 40px;
+  }
+  h1 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 6px;
+  }
+  .sub {
+    color: var(--muted);
+    margin: 0 0 18px;
+    max-width: 70ch;
+  }
+  svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: 1px solid color-mix(in srgb, var(--line) 35%, transparent);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--bg) 92%, var(--neutral));
+  }
+  .title {
+    font-size: 16px;
+    font-weight: 700;
+    fill: var(--fg);
+  }
+  .label {
+    font-size: 13px;
+    font-weight: 650;
+    fill: var(--fg);
+  }
+  .small {
+    font-size: 11px;
+    fill: var(--muted);
+  }
+  .node {
+    stroke: var(--line);
+    stroke-width: 1;
+  }
+  .neutral {
+    fill: var(--neutral);
+  }
+  .input {
+    fill: var(--input);
+  }
+  .process {
+    fill: var(--process);
+  }
+  .storage {
+    fill: var(--storage);
+  }
+  .external {
+    fill: var(--external);
+  }
+  .risk {
+    fill: var(--risk);
+  }
+  .new {
+    fill: var(--new);
+  }
+  .edge {
+    stroke: var(--line);
+    stroke-width: 1.5;
+    fill: none;
+  }
+  .edge-new {
+    stroke: #16a34a;
+    stroke-width: 1.8;
+    fill: none;
+  }
+  .edge-future {
+    stroke: var(--line);
+    stroke-width: 1.4;
+    stroke-dasharray: 6 5;
+    fill: none;
+    opacity: 0.85;
+  }
+  .zone {
+    fill: none;
+    stroke: var(--line);
+    stroke-width: 1.2;
+    stroke-dasharray: 7 5;
+    opacity: 0.75;
+  }
+  .zone-now {
+    fill: color-mix(in srgb, var(--process) 12%, transparent);
+  }
+  .zone-ops {
+    fill: color-mix(in srgb, var(--new) 18%, transparent);
+  }
+  .zone-future {
+    fill: color-mix(in srgb, var(--external) 10%, transparent);
+  }
+  .legend {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px 16px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    border: 1px solid var(--line);
+    vertical-align: -1px;
+    margin-right: 6px;
+  }
+  .s-input {
+    background: var(--input);
+  }
+  .s-process {
+    background: var(--process);
+  }
+  .s-storage {
+    background: var(--storage);
+  }
+  .s-external {
+    background: var(--external);
+  }
+  .s-new {
+    background: var(--new);
+  }
+  .s-risk {
+    background: var(--risk);
+  }
+  .notes {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--line) 35%, transparent);
+    background: color-mix(in srgb, var(--bg) 88%, var(--neutral));
+  }
+  .notes h2 {
+    margin: 0 0 8px;
+    font-size: 14px;
+  }
+  .notes ul {
+    margin: 0;
+    padding-left: 18px;
+  }
+  .notes li {
+    margin: 4px 0;
+  }
+</style>
+<main>
+  <h1>HR Agent — Deployed System (one page)</h1>
+  <p class="sub">
+    Project 3 outcome: prove the <strong>live</strong> Streamlit demo with cost, latency, eval gate, and OPS runbook.
+    Same product for future private Path A/B — packaging only, not a second app.
+  </p>
+
+  <svg viewBox="0 0 1040 720" role="img" aria-label="HR Agent deployed system architecture">
+    <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--line)" />
+      </marker>
+      <marker id="arrow-new" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#16a34a" />
+      </marker>
+    </defs>
+
+    <!-- Zones -->
+    <rect class="zone zone-now" x="40" y="48" width="960" height="320" rx="14" />
+    <text class="title" x="56" y="76">NOW — Public demo deploy (Project 3 vehicle)</text>
+    <text class="small" x="56" y="94">https://hr-agent-hohoho852.streamlit.app · repo hohoho852/hr-agent · no new repo</text>
+
+    <rect class="zone zone-ops" x="40" y="388" width="960" height="148" rx="14" />
+    <text class="title" x="56" y="416">PROJECT 3 ADD — Ops / production-readiness layer</text>
+    <text class="small" x="56" y="434">Code + docs on existing app. Not a monitoring product. Not Path A/B go-live.</text>
+
+    <rect class="zone zone-future" x="40" y="556" width="960" height="140" rx="14" />
+    <text class="title" x="56" y="584">LATER — Private company deploy (same product)</text>
+    <text class="small" x="56" y="602">Documented in docs/DEPLOY-A-vs-B.md · SSO + private host · out of this slice</text>
+
+    <!-- NOW row: actors / host -->
+    <rect class="node input" x="60" y="118" width="140" height="64" rx="10" />
+    <text class="label" x="88" y="146">Browser</text>
+    <text class="small" x="78" y="166">visitor / operator</text>
+
+    <rect class="node process" x="250" y="110" width="200" height="80" rx="10" />
+    <text class="label" x="278" y="140">Streamlit Cloud</text>
+    <text class="small" x="275" y="160">app.py · demo limits</text>
+    <text class="small" x="268" y="176">session cap + cooldown</text>
+
+    <rect class="node external" x="500" y="118" width="170" height="64" rx="10" />
+    <text class="label" x="528" y="146">Secrets store</text>
+    <text class="small" x="515" y="166">LLM_API_KEY / MODEL</text>
+
+    <rect class="node external" x="720" y="118" width="240" height="64" rx="10" />
+    <text class="label" x="768" y="146">Customer LLM API</text>
+    <text class="small" x="745" y="166">OpenAI-compatible endpoint</text>
+
+    <!-- NOW row: RAG core -->
+    <rect class="node input" x="60" y="240" width="150" height="70" rx="10" />
+    <text class="label" x="92" y="270">Corpus</text>
+    <text class="small" x="78" y="290">source/ + data/</text>
+
+    <rect class="node process" x="250" y="240" width="150" height="70" rx="10" />
+    <text class="label" x="285" y="270">Ingest</text>
+    <text class="small" x="268" y="290">chunk 800/120</text>
+
+    <rect class="node process" x="440" y="240" width="150" height="70" rx="10" />
+    <text class="label" x="468" y="270">Local BGE</text>
+    <text class="small" x="455" y="290">embed on-box</text>
+
+    <rect class="node storage" x="630" y="240" width="140" height="70" rx="10" />
+    <text class="label" x="668" y="270">Chroma</text>
+    <text class="small" x="648" y="290">top_k = 4</text>
+
+    <rect class="node process" x="810" y="232" width="150" height="86" rx="10" />
+    <text class="label" x="838" y="262">Query path</text>
+    <text class="small" x="828" y="282">retrieve + cite</text>
+    <text class="small" x="822" y="298">inform ≠ execute</text>
+
+    <!-- connectors NOW -->
+    <path class="edge" marker-end="url(#arrow)" d="M200 150 H250" />
+    <path class="edge" marker-end="url(#arrow)" d="M450 150 H500" />
+    <path class="edge" marker-end="url(#arrow)" d="M670 150 H720" />
+    <path class="edge" marker-end="url(#arrow)" d="M350 190 V232" />
+    <path class="edge" marker-end="url(#arrow)" d="M210 275 H250" />
+    <path class="edge" marker-end="url(#arrow)" d="M400 275 H440" />
+    <path class="edge" marker-end="url(#arrow)" d="M590 275 H630" />
+    <path class="edge" marker-end="url(#arrow)" d="M770 275 H810" />
+    <path class="edge" marker-end="url(#arrow)" d="M885 232 V182" />
+    <path class="edge" marker-end="url(#arrow)" d="M885 182 H840" />
+    <path class="edge" marker-end="url(#arrow)" d="M350 190 H885" />
+
+    <!-- OPS layer boxes -->
+    <rect class="node new" x="60" y="452" width="170" height="64" rx="10" />
+    <text class="label" x="95" y="480">src/cost.py</text>
+    <text class="small" x="78" y="500">price table · estimate</text>
+
+    <rect class="node new" x="260" y="452" width="210" height="64" rx="10" />
+    <text class="label" x="285" y="480">QueryEvent JSONL</text>
+    <text class="small" x="278" y="500">runs/query_events.jsonl</text>
+
+    <rect class="node new" x="500" y="452" width="200" height="64" rx="10" />
+    <text class="label" x="528" y="480">Eval cost rollup</text>
+    <text class="small" x="518" y="500">last_report.json fields</text>
+
+    <rect class="node new" x="730" y="452" width="230" height="64" rx="10" />
+    <text class="label" x="780" y="480">docs/OPS.md</text>
+    <text class="small" x="755" y="500">+ README Operations</text>
+
+    <!-- OPS connectors from query -->
+    <path class="edge-new" marker-end="url(#arrow-new)" d="M870 318 V420" />
+    <path class="edge-new" marker-end="url(#arrow-new)" d="M870 420 H365" />
+    <path class="edge-new" marker-end="url(#arrow-new)" d="M365 420 V452" />
+    <path class="edge-new" marker-end="url(#arrow-new)" d="M145 452 V420 H870" />
+    <path class="edge-new" marker-end="url(#arrow-new)" d="M600 452 V430 H870" />
+    <text class="small" x="880" y="360">fail-open log</text>
+    <text class="small" x="880" y="376">on each answer</text>
+
+    <!-- FUTURE -->
+    <rect class="node external" x="60" y="620" width="200" height="56" rx="10" />
+    <text class="label" x="95" y="645">Path A — neutral</text>
+    <text class="small" x="85" y="662">OIDC · any cloud · box</text>
+
+    <rect class="node external" x="290" y="620" width="200" height="56" rx="10" />
+    <text class="label" x="318" y="645">Path B — Microsoft</text>
+    <text class="small" x="312" y="662">Entra · Azure · Teams+</text>
+
+    <rect class="node risk" x="520" y="620" width="200" height="56" rx="10" />
+    <text class="label" x="555" y="645">Not this slice</text>
+    <text class="small" x="540" y="662">SSO / Docker / new repo</text>
+
+    <rect class="node storage" x="750" y="620" width="210" height="56" rx="10" />
+    <text class="label" x="785" y="645">Same QueryEvent</text>
+    <text class="small" x="772" y="662">feeds future audit path</text>
+
+    <path class="edge-future" marker-end="url(#arrow)" d="M160 536 V620" />
+    <path class="edge-future" marker-end="url(#arrow)" d="M390 536 V620" />
+    <path class="edge-future" marker-end="url(#arrow)" d="M855 516 V620" />
+  </svg>
+
+  <div class="legend">
+    <div><span class="swatch s-input"></span>Input / corpus / user</div>
+    <div><span class="swatch s-process"></span>Runtime / app path</div>
+    <div><span class="swatch s-storage"></span>Index / durable store</div>
+    <div><span class="swatch s-external"></span>External / host choice</div>
+    <div><span class="swatch s-new"></span>Project 3 new work</div>
+    <div><span class="swatch s-risk"></span>Explicit non-goal</div>
+  </div>
+
+  <div class="notes">
+    <h2>Outcome checklist</h2>
+    <ul>
+      <li><strong>Live proof:</strong> demo URL still works with demo spend guards.</li>
+      <li><strong>Per-query evidence:</strong> latency, tokens, est. cost, ok/error (no full prompt/answer text by default).</li>
+      <li><strong>Quality gate:</strong> <code>python -m src.eval</code> ≥ 7/7 with cost rollup in report.</li>
+      <li><strong>Ops story:</strong> <code>docs/OPS.md</code> ties demo controls → eval → cost model → Path A/B gaps.</li>
+      <li><strong>Honest claim:</strong> Community Cloud ≠ private SSO production.</li>
+    </ul>
+  </div>
+</main>
