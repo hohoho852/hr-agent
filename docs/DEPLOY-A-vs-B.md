@@ -124,4 +124,8 @@ Then open to full <1k headcount.
 - Fine-tuned custom LLM requirement  
 - Workflow execution inside HRIS  
 
-See also: `docs/PRODUCT.md` (product design), repo README (demo quickstart).
+See also:
+- [`DEPLOY-GUIDE.md`](DEPLOY-GUIDE.md) — step-by-step Path A & Path B
+- [`diagrams/production-deploy-architecture.html`](diagrams/production-deploy-architecture.html) — production topology
+- [`diagrams/demo-streamlit-architecture.html`](diagrams/demo-streamlit-architecture.html) — public Streamlit demo only
+- `docs/PRODUCT.md` (product design), repo README (demo quickstart)

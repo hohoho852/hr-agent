@@ -75,7 +75,7 @@ Runtime indexing uses the machine-readable pack in [`data/`](data/) (same polici
 | Orchestration | LlamaIndex | Ingest / retrieve / query path |
 | UI | Streamlit | Multi-turn chat with citations per reply |
 
-Company deploy (private + SSO): IT picks **Path A** (cloud-neutral) or **Path B** (Azure/M365) — same product. See [`docs/DEPLOY-A-vs-B.md`](docs/DEPLOY-A-vs-B.md).
+Company deploy (private + SSO): IT picks **Path A** (cloud-neutral) or **Path B** (Azure/M365) — same product. See [`docs/DEPLOY-A-vs-B.md`](docs/DEPLOY-A-vs-B.md), step-by-step [`docs/DEPLOY-GUIDE.md`](docs/DEPLOY-GUIDE.md), and diagrams under [`docs/diagrams/`](docs/diagrams/).
 
 ---
 
@@ -146,7 +146,9 @@ hr-agent/
 ├── docs/
 │   ├── PRODUCT.md
 │   ├── OPS.md                 # ops / logging / eval gate
-│   └── DEPLOY-A-vs-B.md
+│   ├── DEPLOY-A-vs-B.md       # IT decision one-pager
+│   ├── DEPLOY-GUIDE.md        # Path A/B step-by-step
+│   └── diagrams/              # demo + production architecture HTML
 ├── eval/
 │   ├── golden_questions.json
 │   └── last_report.json
@@ -213,6 +215,12 @@ python -m src.ops_report  # summarize runs/query_events.jsonl
 
 **Live demo:** [hr-agent-hohoho852.streamlit.app](https://hr-agent-hohoho852.streamlit.app/)
 
+**Architecture (HTML, open in browser):**
+- Demo (Streamlit Cloud): [`docs/diagrams/demo-streamlit-architecture.html`](docs/diagrams/demo-streamlit-architecture.html)
+- Production Path A/B: [`docs/diagrams/production-deploy-architecture.html`](docs/diagrams/production-deploy-architecture.html)
+
+**Private deploy:** [`docs/DEPLOY-GUIDE.md`](docs/DEPLOY-GUIDE.md) (steps) · [`docs/DEPLOY-A-vs-B.md`](docs/DEPLOY-A-vs-B.md) (choose path)
+
 ---
 
 ## Operating controls
@@ -224,7 +232,7 @@ python -m src.ops_report  # summarize runs/query_events.jsonl
 - Public demo: session limits count **attempted model calls** (default 10/session, 5s cooldown)
 - `.env` is gitignored — never commit API keys
 
-For a live tenant deploy, add SSO, DLP/redaction, customer-owned model endpoint/key, and deflection analytics as needed. IT deploy choice: [`docs/DEPLOY-A-vs-B.md`](docs/DEPLOY-A-vs-B.md).
+For a live tenant deploy, add SSO, DLP/redaction, customer-owned model endpoint/key, and deflection analytics as needed. IT deploy choice: [`docs/DEPLOY-A-vs-B.md`](docs/DEPLOY-A-vs-B.md); full steps: [`docs/DEPLOY-GUIDE.md`](docs/DEPLOY-GUIDE.md).
 
 ---
 

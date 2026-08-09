@@ -1,0 +1,245 @@
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HR Agent — Public Demo Architecture (Streamlit Cloud)</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f8fafc;
+    --fg: #172033;
+    --muted: #5b6475;
+    --line: #64748b;
+    --neutral: #e2e8f0;
+    --input: #bfdbfe;
+    --process: #c7d2fe;
+    --storage: #99f6e4;
+    --external: #fde68a;
+    --risk: #fecaca;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f172a;
+      --fg: #e5e7eb;
+      --muted: #a3adbd;
+      --line: #94a3b8;
+      --neutral: #334155;
+      --input: #1d4ed8;
+      --process: #4338ca;
+      --storage: #0f766e;
+      --external: #92400e;
+      --risk: #991b1b;
+    }
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  main {
+    max-width: 1080px;
+    margin: 28px auto;
+    padding: 0 20px 36px;
+  }
+  h1 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 6px;
+  }
+  .sub {
+    color: var(--muted);
+    margin: 0 0 16px;
+    max-width: 72ch;
+  }
+  svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: 1px solid color-mix(in srgb, var(--line) 35%, transparent);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--bg) 92%, var(--neutral));
+  }
+  .title { font-size: 15px; font-weight: 700; fill: var(--fg); }
+  .label { font-size: 13px; font-weight: 650; fill: var(--fg); }
+  .small { font-size: 11px; fill: var(--muted); }
+  .node { stroke: var(--line); stroke-width: 1; }
+  .neutral { fill: var(--neutral); }
+  .input { fill: var(--input); }
+  .process { fill: var(--process); }
+  .storage { fill: var(--storage); }
+  .external { fill: var(--external); }
+  .risk { fill: var(--risk); }
+  .edge { stroke: var(--line); stroke-width: 1.5; fill: none; }
+  .zone {
+    fill: color-mix(in srgb, var(--process) 10%, transparent);
+    stroke: var(--line);
+    stroke-width: 1.2;
+    stroke-dasharray: 7 5;
+    opacity: 0.95;
+  }
+  .zone-data {
+    fill: color-mix(in srgb, var(--storage) 12%, transparent);
+  }
+  .zone-ops {
+    fill: color-mix(in srgb, var(--external) 12%, transparent);
+  }
+  .legend {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 8px 14px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    border: 1px solid var(--line);
+    vertical-align: -1px;
+    margin-right: 6px;
+  }
+  .s-input { background: var(--input); }
+  .s-process { background: var(--process); }
+  .s-storage { background: var(--storage); }
+  .s-external { background: var(--external); }
+  .s-risk { background: var(--risk); }
+  .notes {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--line) 35%, transparent);
+  }
+  .notes h2 { margin: 0 0 8px; font-size: 14px; }
+  .notes ul { margin: 0; padding-left: 18px; }
+  .notes li { margin: 4px 0; }
+  a { color: inherit; }
+</style>
+<main>
+  <h1>HR Agent — Public demo architecture</h1>
+  <p class="sub">
+    How the live employee policy assistant runs on
+    <strong>Streamlit Community Cloud</strong>.
+    Sample handbook only. Not a private company production deploy
+    (no SSO). Live:
+    <a href="https://hr-agent-hohoho852.streamlit.app/">hr-agent-hohoho852.streamlit.app</a>
+  </p>
+
+  <svg viewBox="0 0 1000 640" role="img" aria-label="HR Agent Streamlit Cloud demo architecture">
+    <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--line)" />
+      </marker>
+    </defs>
+
+    <!-- Zones -->
+    <rect class="zone" x="36" y="40" width="928" height="200" rx="14" />
+    <text class="title" x="52" y="68">Request path (visitor → answer + citations)</text>
+
+    <rect class="zone zone-data" x="36" y="260" width="928" height="170" rx="14" />
+    <text class="title" x="52" y="288">Knowledge path (sample handbook → local index)</text>
+
+    <rect class="zone zone-ops" x="36" y="450" width="928" height="160" rx="14" />
+    <text class="title" x="52" y="478">Ops on the demo (spend control, quality, visibility)</text>
+
+    <!-- Request path nodes -->
+    <rect class="node input" x="56" y="96" width="150" height="72" rx="10" />
+    <text class="label" x="92" y="126">Browser</text>
+    <text class="small" x="72" y="146">employee / evaluator</text>
+
+    <rect class="node process" x="250" y="88" width="200" height="88" rx="10" />
+    <text class="label" x="278" y="118">Streamlit Cloud</text>
+    <text class="small" x="272" y="138">app.py chat UI</text>
+    <text class="small" x="262" y="156">session limits + cooldown</text>
+
+    <rect class="node process" x="500" y="88" width="200" height="88" rx="10" />
+    <text class="label" x="545" y="118">Query engine</text>
+    <text class="small" x="528" y="138">retrieve top 4 chunks</text>
+    <text class="small" x="522" y="156">answer + cite sources</text>
+
+    <rect class="node external" x="750" y="96" width="180" height="72" rx="10" />
+    <text class="label" x="778" y="126">LLM API</text>
+    <text class="small" x="762" y="146">customer model + key</text>
+
+    <!-- edges request -->
+    <path class="edge" marker-end="url(#arrow)" d="M206 132 H250" />
+    <path class="edge" marker-end="url(#arrow)" d="M450 132 H500" />
+    <path class="edge" marker-end="url(#arrow)" d="M700 132 H750" />
+    <path class="edge" marker-end="url(#arrow)" d="M840 96 V70 H350 V88" />
+
+    <!-- Knowledge path -->
+    <rect class="node input" x="56" y="316" width="170" height="72" rx="10" />
+    <text class="label" x="88" y="346">Sample corpus</text>
+    <text class="small" x="72" y="366">source/ PDFs · data/ md</text>
+
+    <rect class="node process" x="270" y="316" width="160" height="72" rx="10" />
+    <text class="label" x="312" y="346">Ingest</text>
+    <text class="small" x="292" y="366">chunk 800 / overlap 120</text>
+
+    <rect class="node process" x="474" y="316" width="160" height="72" rx="10" />
+    <text class="label" x="508" y="346">Local BGE</text>
+    <text class="small" x="492" y="366">embeddings on host</text>
+
+    <rect class="node storage" x="678" y="316" width="160" height="72" rx="10" />
+    <text class="label" x="722" y="346">Chroma</text>
+    <text class="small" x="698" y="366">vector index (local)</text>
+
+    <path class="edge" marker-end="url(#arrow)" d="M226 352 H270" />
+    <path class="edge" marker-end="url(#arrow)" d="M430 352 H474" />
+    <path class="edge" marker-end="url(#arrow)" d="M634 352 H678" />
+    <path class="edge" marker-end="url(#arrow)" d="M758 316 V220 H600 V176" />
+    <text class="small" x="770" y="270">retrieval at ask time</text>
+
+    <!-- Secrets -->
+    <rect class="node external" x="860" y="88" width="0" height="0" />
+    <rect class="node external" x="56" y="188" width="0" height="0" />
+
+    <!-- Ops -->
+    <rect class="node external" x="56" y="504" width="200" height="72" rx="10" />
+    <text class="label" x="92" y="534">Streamlit Secrets</text>
+    <text class="small" x="78" y="554">LLM_API_KEY (not in git)</text>
+
+    <rect class="node process" x="290" y="504" width="200" height="72" rx="10" />
+    <text class="label" x="328" y="534">Demo spend guards</text>
+    <text class="small" x="308" y="554">10 Q / session · 5s cooldown</text>
+
+    <rect class="node storage" x="524" y="504" width="200" height="72" rx="10" />
+    <text class="label" x="548" y="534">Query event log</text>
+    <text class="small" x="538" y="554">latency · tokens · est. cost</text>
+
+    <rect class="node process" x="758" y="504" width="170" height="72" rx="10" />
+    <text class="label" x="798" y="534">Eval gate</text>
+    <text class="small" x="778" y="554">golden Qs · 7/7 sample</text>
+
+    <path class="edge" marker-end="url(#arrow)" d="M350 176 V504" />
+    <path class="edge" marker-end="url(#arrow)" d="M600 176 V504" />
+    <text class="small" x="360" y="430">limits before model call</text>
+    <text class="small" x="610" y="430">log after each answer</text>
+
+    <!-- boundary callout -->
+    <rect class="node risk" x="750" y="316" width="0" height="0" />
+    <rect class="node risk" x="860" y="316" width="104" height="72" rx="10" />
+    <text class="label" x="878" y="346">Boundary</text>
+    <text class="small" x="872" y="366">inform ≠ execute</text>
+  </svg>
+
+  <div class="legend">
+    <div><span class="swatch s-input"></span>User / sample corpus</div>
+    <div><span class="swatch s-process"></span>App / processing</div>
+    <div><span class="swatch s-storage"></span>Index / logs</div>
+    <div><span class="swatch s-external"></span>Secrets / external LLM</div>
+    <div><span class="swatch s-risk"></span>Product boundary</div>
+  </div>
+
+  <div class="notes">
+    <h2>What this demo proves</h2>
+    <ul>
+      <li>Employees ask policy / HR how-to questions and get <strong>cited</strong> answers from the handbook pack.</li>
+      <li>Handbook text is embedded <strong>on the app host</strong> (local BGE + Chroma); only retrieved snippets go to the LLM.</li>
+      <li>Generation uses a <strong>customer-chosen OpenAI-compatible</strong> model key held in Streamlit Secrets.</li>
+      <li>Operators can see <strong>latency, token usage, and estimated cost</strong> per request, plus a golden-question eval gate.</li>
+      <li><strong>Not production:</strong> public URL, sample employer corpus, no company SSO. For private tenant deploy see the production diagram and <code>docs/DEPLOY-GUIDE.md</code>.</li>
+    </ul>
+  </div>
+</main>

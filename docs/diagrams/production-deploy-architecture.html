@@ -1,0 +1,283 @@
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HR Agent — Production Deploy Architecture (Path A / Path B)</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f8fafc;
+    --fg: #172033;
+    --muted: #5b6475;
+    --line: #64748b;
+    --neutral: #e2e8f0;
+    --input: #bfdbfe;
+    --process: #c7d2fe;
+    --storage: #99f6e4;
+    --external: #fde68a;
+    --risk: #fecaca;
+    --pathA: #c7d2fe;
+    --pathB: #fde68a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f172a;
+      --fg: #e5e7eb;
+      --muted: #a3adbd;
+      --line: #94a3b8;
+      --neutral: #334155;
+      --input: #1d4ed8;
+      --process: #4338ca;
+      --storage: #0f766e;
+      --external: #92400e;
+      --risk: #991b1b;
+      --pathA: #312e81;
+      --pathB: #78350f;
+    }
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  main {
+    max-width: 1100px;
+    margin: 28px auto;
+    padding: 0 20px 36px;
+  }
+  h1 { font-size: 22px; font-weight: 700; margin: 0 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 16px; max-width: 75ch; }
+  svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: 1px solid color-mix(in srgb, var(--line) 35%, transparent);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--bg) 92%, var(--neutral));
+  }
+  .title { font-size: 15px; font-weight: 700; fill: var(--fg); }
+  .label { font-size: 12.5px; font-weight: 650; fill: var(--fg); }
+  .small { font-size: 10.5px; fill: var(--muted); }
+  .node { stroke: var(--line); stroke-width: 1; }
+  .neutral { fill: var(--neutral); }
+  .input { fill: var(--input); }
+  .process { fill: var(--process); }
+  .storage { fill: var(--storage); }
+  .external { fill: var(--external); }
+  .risk { fill: var(--risk); }
+  .pathA { fill: var(--pathA); }
+  .pathB { fill: var(--pathB); }
+  .edge { stroke: var(--line); stroke-width: 1.5; fill: none; }
+  .edge-dash { stroke: var(--line); stroke-width: 1.4; fill: none; stroke-dasharray: 6 5; }
+  .zone {
+    fill: none;
+    stroke: var(--line);
+    stroke-width: 1.2;
+    stroke-dasharray: 7 5;
+    opacity: 0.9;
+  }
+  .zone-core {
+    fill: color-mix(in srgb, var(--process) 10%, transparent);
+  }
+  .zone-a {
+    fill: color-mix(in srgb, var(--pathA) 22%, transparent);
+  }
+  .zone-b {
+    fill: color-mix(in srgb, var(--pathB) 22%, transparent);
+  }
+  .legend {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 8px 14px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    border: 1px solid var(--line);
+    vertical-align: -1px;
+    margin-right: 6px;
+  }
+  .s-input { background: var(--input); }
+  .s-process { background: var(--process); }
+  .s-storage { background: var(--storage); }
+  .s-external { background: var(--external); }
+  .s-a { background: var(--pathA); }
+  .s-b { background: var(--pathB); }
+  .s-risk { background: var(--risk); }
+  .notes {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--line) 35%, transparent);
+  }
+  .notes h2 { margin: 0 0 8px; font-size: 14px; }
+  .notes ul { margin: 0; padding-left: 18px; }
+  .notes li { margin: 4px 0; }
+</style>
+<main>
+  <h1>HR Agent — Production deploy architecture</h1>
+  <p class="sub">
+    Private company deployment for employee policy + HR how-tos with citations.
+    <strong>One product codebase</strong>; Path A and Path B are packaging and cloud glue only.
+    Answer behavior does not fork. Full steps: <code>docs/DEPLOY-GUIDE.md</code>.
+  </p>
+
+  <svg viewBox="0 0 1040 760" role="img" aria-label="HR Agent production Path A and Path B architecture">
+    <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--line)" />
+      </marker>
+    </defs>
+
+    <!-- Shared product core -->
+    <rect class="zone zone-core" x="40" y="36" width="960" height="250" rx="14" />
+    <text class="title" x="56" y="64">Shared product (same on Path A and Path B)</text>
+    <text class="small" x="56" y="82">Inform ≠ execute · employer handbook only · customer-owned model key · eval before corpus release</text>
+
+    <rect class="node input" x="60" y="110" width="140" height="68" rx="10" />
+    <text class="label" x="88" y="138">Employee</text>
+    <text class="small" x="78" y="158">SSO browser / app</text>
+
+    <rect class="node process" x="240" y="102" width="170" height="84" rx="10" />
+    <text class="label" x="268" y="130">HR Agent app</text>
+    <text class="small" x="258" y="150">chat + citations</text>
+    <text class="small" x="255" y="168">no HRIS write-back</text>
+
+    <rect class="node process" x="450" y="102" width="160" height="84" rx="10" />
+    <text class="label" x="482" y="130">RAG engine</text>
+    <text class="small" x="468" y="150">retrieve + generate</text>
+    <text class="small" x="472" y="168">top_k sources</text>
+
+    <rect class="node external" x="650" y="110" width="160" height="68" rx="10" />
+    <text class="label" x="678" y="138">Customer LLM</text>
+    <text class="small" x="662" y="158">OpenAI-compatible</text>
+
+    <rect class="node storage" x="850" y="110" width="130" height="68" rx="10" />
+    <text class="label" x="872" y="138">Audit log</text>
+    <text class="small" x="862" y="158">user · Q · sources</text>
+
+    <rect class="node input" x="60" y="210" width="160" height="56" rx="10" />
+    <text class="label" x="78" y="234">Licensed handbook</text>
+    <text class="small" x="82" y="252">PDF / DOCX / library</text>
+
+    <rect class="node process" x="260" y="210" width="150" height="56" rx="10" />
+    <text class="label" x="292" y="234">Ingest / publish</text>
+    <text class="small" x="278" y="252">People Ops approve</text>
+
+    <rect class="node storage" x="450" y="210" width="160" height="56" rx="10" />
+    <text class="label" x="478" y="234">Vector index</text>
+    <text class="small" x="468" y="252">tenant-scoped</text>
+
+    <rect class="node process" x="650" y="210" width="160" height="56" rx="10" />
+    <text class="label" x="688" y="234">Eval gate</text>
+    <text class="small" x="668" y="252">golden Qs per release</text>
+
+    <rect class="node external" x="850" y="210" width="130" height="56" rx="10" />
+    <text class="label" x="872" y="234">Secret store</text>
+    <text class="small" x="868" y="252">keys · not git</text>
+
+    <path class="edge" marker-end="url(#arrow)" d="M200 144 H240" />
+    <path class="edge" marker-end="url(#arrow)" d="M410 144 H450" />
+    <path class="edge" marker-end="url(#arrow)" d="M610 144 H650" />
+    <path class="edge" marker-end="url(#arrow)" d="M810 144 H850" />
+    <path class="edge" marker-end="url(#arrow)" d="M220 238 H260" />
+    <path class="edge" marker-end="url(#arrow)" d="M410 238 H450" />
+    <path class="edge" marker-end="url(#arrow)" d="M530 210 V186" />
+    <path class="edge" marker-end="url(#arrow)" d="M610 238 H650" />
+    <path class="edge-dash" marker-end="url(#arrow)" d="M810 238 H850" />
+
+    <!-- Path A -->
+    <rect class="zone zone-a" x="40" y="310" width="470" height="280" rx="14" />
+    <text class="title" x="56" y="338">Path A — Cloud-neutral</text>
+    <text class="small" x="56" y="356">Choose when: AWS/GCP/multi-cloud · Google Workspace · Okta · “ship a container”</text>
+
+    <rect class="node pathA" x="60" y="380" width="200" height="56" rx="10" />
+    <text class="label" x="98" y="404">Any OIDC IdP</text>
+    <text class="small" x="78" y="422">Okta · Google · Entra · Auth0</text>
+
+    <rect class="node pathA" x="280" y="380" width="200" height="56" rx="10" />
+    <text class="label" x="308" y="404">Container host</text>
+    <text class="small" x="292" y="422">ECS · Cloud Run · ACA …</text>
+
+    <rect class="node pathA" x="60" y="456" width="200" height="56" rx="10" />
+    <text class="label" x="98" y="480">Object storage</text>
+    <text class="small" x="88" y="498">S3 · GCS · Azure Blob</text>
+
+    <rect class="node pathA" x="280" y="456" width="200" height="56" rx="10" />
+    <text class="label" x="302" y="480">Postgres + pgvector</text>
+    <text class="small" x="308" y="498">or equivalent index</text>
+
+    <rect class="node pathA" x="60" y="532" width="200" height="40" rx="10" />
+    <text class="label" x="88" y="556">Secrets Manager</text>
+
+    <rect class="node pathA" x="280" y="532" width="200" height="40" rx="10" />
+    <text class="label" x="318" y="556">Private URL / VPN</text>
+
+    <!-- Path B -->
+    <rect class="zone zone-b" x="530" y="310" width="470" height="280" rx="14" />
+    <text class="title" x="546" y="338">Path B — Microsoft-centric</text>
+    <text class="small" x="546" y="356">Choose when: M365 + Entra is the spine · SharePoint handbooks · Teams later</text>
+
+    <rect class="node pathB" x="550" y="380" width="200" height="56" rx="10" />
+    <text class="label" x="600" y="404">Entra ID</text>
+    <text class="small" x="568" y="422">Easy Auth / MSAL first-class</text>
+
+    <rect class="node pathB" x="770" y="380" width="200" height="56" rx="10" />
+    <text class="label" x="798" y="404">Azure app host</text>
+    <text class="small" x="782" y="422">App Service / Container Apps</text>
+
+    <rect class="node pathB" x="550" y="456" width="200" height="56" rx="10" />
+    <text class="label" x="580" y="480">SharePoint / Blob</text>
+    <text class="small" x="578" y="498">handbook library</text>
+
+    <rect class="node pathB" x="770" y="456" width="200" height="56" rx="10" />
+    <text class="label" x="792" y="480">PG or AI Search</text>
+    <text class="small" x="788" y="498">tenant vector index</text>
+
+    <rect class="node pathB" x="550" y="532" width="200" height="40" rx="10" />
+    <text class="label" x="588" y="556">Azure Key Vault</text>
+
+    <rect class="node pathB" x="770" y="532" width="200" height="40" rx="10" />
+    <text class="label" x="808" y="556">Private Link option</text>
+
+    <!-- Decision + non-goals -->
+    <rect class="node neutral" x="40" y="614" width="600" height="110" rx="12" />
+    <text class="title" x="56" y="642">Decision rule</text>
+    <text class="small" x="56" y="664">M365 + Entra as default workplace? → Path B</text>
+    <text class="small" x="56" y="682">Anything else / multi-cloud? → Path A</text>
+    <text class="small" x="56" y="700">Tiny pilot, almost no cloud yet? → short VM pilot, then A or B</text>
+
+    <rect class="node risk" x="660" y="614" width="340" height="110" rx="12" />
+    <text class="title" x="676" y="642">Not production</text>
+    <text class="small" x="676" y="664">Public Streamlit Community Cloud</text>
+    <text class="small" x="676" y="682">Anonymous access · sample corpus only</text>
+    <text class="small" x="676" y="700">Workflow execution inside HRIS</text>
+  </svg>
+
+  <div class="legend">
+    <div><span class="swatch s-process"></span>Shared app / RAG</div>
+    <div><span class="swatch s-storage"></span>Index / audit</div>
+    <div><span class="swatch s-external"></span>LLM / secrets</div>
+    <div><span class="swatch s-a"></span>Path A services</div>
+    <div><span class="swatch s-b"></span>Path B services</div>
+    <div><span class="swatch s-risk"></span>Explicit non-goals</div>
+  </div>
+
+  <div class="notes">
+    <h2>Non-negotiables (both paths)</h2>
+    <ul>
+      <li>Company <strong>SSO</strong> — no anonymous production access.</li>
+      <li><strong>Employer-licensed</strong> handbook only (not the public demo pack).</li>
+      <li>Customer-supplied <strong>LLM key / endpoint</strong>.</li>
+      <li>Answers <strong>cite sources</strong>; escalate exceptions; never submit leave/pay/workflows.</li>
+      <li><strong>Audit</strong> user, time, question, answer, source ids, model.</li>
+      <li><strong>Eval gate</strong> on golden questions before each corpus release.</li>
+      <li>Secrets in cloud secret store / Key Vault — never in git.</li>
+    </ul>
+  </div>
+</main>
