@@ -4,10 +4,11 @@ Production-readiness notes for the **public Streamlit demo** and local ops. This
 
 **Live demo:** https://hr-agent-hohoho852.streamlit.app/
 
-**Architecture diagrams:**
-- Public demo (Streamlit Cloud): [`diagrams/demo-streamlit-architecture.html`](diagrams/demo-streamlit-architecture.html) · README SVG: [`diagrams/demo-streamlit-architecture.svg`](diagrams/demo-streamlit-architecture.svg)
-- Production Path A/B: [`diagrams/production-deploy-architecture.html`](diagrams/production-deploy-architecture.html)
-- Hub: [`diagrams/deployed-system-architecture.html`](diagrams/deployed-system-architecture.html)
+**Architecture diagrams (hosted — GitHub file view does not run HTML):**
+- Public demo: https://hohoho852.github.io/hr-agent/diagrams/demo-streamlit-architecture.html
+- Production Path A/B: https://hohoho852.github.io/hr-agent/diagrams/production-deploy-architecture.html
+- Docs hub: https://hohoho852.github.io/hr-agent/
+- README SVG (inline on GitHub): [`diagrams/demo-streamlit-architecture.svg`](diagrams/demo-streamlit-architecture.svg)
 
 **Production steps:** [`DEPLOY-GUIDE.md`](DEPLOY-GUIDE.md) · decision one-pager: [`DEPLOY-A-vs-B.md`](DEPLOY-A-vs-B.md)
 

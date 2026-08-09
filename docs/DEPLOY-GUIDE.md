@@ -9,8 +9,9 @@ Step-by-step packaging for a **private company** deployment.
 |--------------|---------|
 | This guide | Ordered install / cutover steps for IT + People Ops |
 | [`DEPLOY-A-vs-B.md`](DEPLOY-A-vs-B.md) | One-page decision table |
-| [`diagrams/production-deploy-architecture.html`](diagrams/production-deploy-architecture.html) | Production architecture diagram |
-| [`diagrams/demo-streamlit-architecture.html`](diagrams/demo-streamlit-architecture.html) | Public Streamlit **demo** only |
+| [Production architecture (hosted)](https://hohoho852.github.io/hr-agent/diagrams/production-deploy-architecture.html) | Production architecture diagram |
+| [Demo architecture (hosted)](https://hohoho852.github.io/hr-agent/diagrams/demo-streamlit-architecture.html) | Public Streamlit **demo** only |
+| [Docs hub](https://hohoho852.github.io/hr-agent/) | GitHub Pages index for HTML diagrams |
 | [`OPS.md`](OPS.md) | Demo ops (logging, eval, cost env) |
 
 **Not this guide:** running the public Streamlit Community Cloud demo as production.
@@ -342,8 +343,8 @@ Pilot users open the private URL, authenticate with Entra, receive cited answers
 | File | Use |
 |------|-----|
 | [`DEPLOY-A-vs-B.md`](DEPLOY-A-vs-B.md) | Executive / IT one-pager |
-| [`diagrams/production-deploy-architecture.html`](diagrams/production-deploy-architecture.html) | Production topology |
-| [`diagrams/demo-streamlit-architecture.html`](diagrams/demo-streamlit-architecture.html) | Public demo topology |
+| [Production topology (hosted)](https://hohoho852.github.io/hr-agent/diagrams/production-deploy-architecture.html) | Production topology |
+| [Demo topology (hosted)](https://hohoho852.github.io/hr-agent/diagrams/demo-streamlit-architecture.html) | Public demo topology |
 | [`OPS.md`](OPS.md) | Demo logging, cost env, eval commands |
 | [`PRODUCT.md`](PRODUCT.md) | Product design & boundaries |
 | Repo `README.md` | Clone, local run, public demo link |

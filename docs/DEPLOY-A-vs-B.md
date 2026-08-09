@@ -126,6 +126,7 @@ Then open to full <1k headcount.
 
 See also:
 - [`DEPLOY-GUIDE.md`](DEPLOY-GUIDE.md) — step-by-step Path A & Path B
-- [`diagrams/production-deploy-architecture.html`](diagrams/production-deploy-architecture.html) — production topology
-- [`diagrams/demo-streamlit-architecture.html`](diagrams/demo-streamlit-architecture.html) — public Streamlit demo only
+- Production topology (hosted): https://hohoho852.github.io/hr-agent/diagrams/production-deploy-architecture.html
+- Public Streamlit demo topology (hosted): https://hohoho852.github.io/hr-agent/diagrams/demo-streamlit-architecture.html
+- Docs hub: https://hohoho852.github.io/hr-agent/
 - `docs/PRODUCT.md` (product design), repo README (demo quickstart)

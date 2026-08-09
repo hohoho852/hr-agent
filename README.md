@@ -6,13 +6,22 @@ Employee-facing assistant for **company policy** and **standard HR how-tos**.
 
 Answers common questions (leave, hybrid work, expenses, profile updates) with **citations** from the employer handbook pack. Built so People Ops can deflect repetitive Tier-1 volume without the bot approving leave, changing pay, or handling exceptions.
 
-**Live demo:** [hr-agent-hohoho852.streamlit.app](https://hr-agent-hohoho852.streamlit.app/) · **[Architecture (HTML)](docs/diagrams/demo-streamlit-architecture.html)** · [Production deploy](docs/DEPLOY-GUIDE.md)
+**Live demo:** [hr-agent-hohoho852.streamlit.app](https://hr-agent-hohoho852.streamlit.app/) · **[Architecture (open in browser)](https://hohoho852.github.io/hr-agent/diagrams/demo-streamlit-architecture.html)** · [Production deploy guide](docs/DEPLOY-GUIDE.md)
 
 ### Public demo architecture (Streamlit Community Cloud)
 
-![HR Agent public demo architecture on Streamlit Community Cloud](docs/diagrams/demo-streamlit-architecture.svg)
+[![HR Agent public demo architecture on Streamlit Community Cloud](docs/diagrams/demo-streamlit-architecture.svg)](https://hohoho852.github.io/hr-agent/diagrams/demo-streamlit-architecture.html)
 
-Sample handbook only — not a private company SSO deploy. Full interactive diagram: [`docs/diagrams/demo-streamlit-architecture.html`](docs/diagrams/demo-streamlit-architecture.html). Production Path A/B: [`docs/diagrams/production-deploy-architecture.html`](docs/diagrams/production-deploy-architecture.html).
+Sample handbook only — not a private company SSO deploy.
+
+| View | Link |
+|------|------|
+| **Demo architecture (hosted HTML)** | https://hohoho852.github.io/hr-agent/diagrams/demo-streamlit-architecture.html |
+| **Production Path A/B (hosted HTML)** | https://hohoho852.github.io/hr-agent/diagrams/production-deploy-architecture.html |
+| Docs hub | https://hohoho852.github.io/hr-agent/ |
+| Step-by-step Path A/B | [`docs/DEPLOY-GUIDE.md`](docs/DEPLOY-GUIDE.md) |
+
+> GitHub’s file browser shows HTML as **source only** and will not run it. Use the **github.io** links above (GitHub Pages) or open the file locally.
 
 ---
 
@@ -221,9 +230,10 @@ python -m src.ops_report  # summarize runs/query_events.jsonl
 
 **Live demo:** [hr-agent-hohoho852.streamlit.app](https://hr-agent-hohoho852.streamlit.app/)
 
-**Architecture (HTML, open in browser):**
-- Demo (Streamlit Cloud): [`docs/diagrams/demo-streamlit-architecture.html`](docs/diagrams/demo-streamlit-architecture.html)
-- Production Path A/B: [`docs/diagrams/production-deploy-architecture.html`](docs/diagrams/production-deploy-architecture.html)
+**Architecture (hosted HTML — opens in browser):**
+- Demo (Streamlit Cloud): https://hohoho852.github.io/hr-agent/diagrams/demo-streamlit-architecture.html
+- Production Path A/B: https://hohoho852.github.io/hr-agent/diagrams/production-deploy-architecture.html
+- Docs hub: https://hohoho852.github.io/hr-agent/
 
 **Private deploy:** [`docs/DEPLOY-GUIDE.md`](docs/DEPLOY-GUIDE.md) (steps) · [`docs/DEPLOY-A-vs-B.md`](docs/DEPLOY-A-vs-B.md) (choose path)
 

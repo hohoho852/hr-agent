@@ -1,0 +1,88 @@
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HR Agent — Docs & architecture</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f8fafc;
+    --fg: #172033;
+    --muted: #5b6475;
+    --line: #64748b;
+    --card: #e2e8f0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f172a;
+      --fg: #e5e7eb;
+      --muted: #a3adbd;
+      --line: #94a3b8;
+      --card: #334155;
+    }
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  main {
+    max-width: 720px;
+    margin: 40px auto;
+    padding: 0 20px 48px;
+  }
+  h1 {
+    font-size: 22px;
+    margin: 0 0 8px;
+  }
+  p {
+    color: var(--muted);
+    margin: 0 0 18px;
+  }
+  a.card {
+    display: block;
+    padding: 16px 18px;
+    margin: 0 0 12px;
+    border-radius: 12px;
+    border: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
+    background: color-mix(in srgb, var(--card) 55%, var(--bg));
+    color: inherit;
+    text-decoration: none;
+  }
+  a.card strong {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+  a.card span {
+    color: var(--muted);
+    font-size: 13px;
+  }
+</style>
+<main>
+  <h1>HR Agent — Docs & architecture</h1>
+  <p>
+    Hosted pages for diagrams (GitHub does not execute HTML inside the repo file browser).
+    Product repo:
+    <a href="https://github.com/hohoho852/hr-agent">github.com/hohoho852/hr-agent</a>
+    · Live demo:
+    <a href="https://hr-agent-hohoho852.streamlit.app/">Streamlit</a>
+  </p>
+
+  <a class="card" href="./diagrams/demo-streamlit-architecture.html">
+    <strong>Public demo architecture (Streamlit Cloud)</strong>
+    <span>Visitor path, sample handbook index, spend guards, eval, cost/latency log.</span>
+  </a>
+  <a class="card" href="./diagrams/production-deploy-architecture.html">
+    <strong>Production deploy architecture (Path A / Path B)</strong>
+    <span>Private SSO app, shared product core, cloud-neutral vs Microsoft packaging.</span>
+  </a>
+  <a class="card" href="./diagrams/deployed-system-architecture.html">
+    <strong>Architecture hub</strong>
+    <span>Short index of the two diagrams above.</span>
+  </a>
+  <a class="card" href="https://github.com/hohoho852/hr-agent/blob/main/docs/DEPLOY-GUIDE.md">
+    <strong>Path A/B step-by-step guide (Markdown)</strong>
+    <span>Opens on GitHub — rendered as docs, not HTML.</span>
+  </a>
+</main>
